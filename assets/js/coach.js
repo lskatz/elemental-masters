@@ -9,7 +9,7 @@
  *   render:  returns the HTML body for the tip.
  *
  * The first matching tip is shown on each render. Once a tip is dismissed
- * by the player, it never reappears for that browser. After level 5 the
+ * by the player, it never reappears for that browser. After level 10 the
  * coach goes silent — by then the player has the basics.
  * ========================================================================== */
 
@@ -118,7 +118,7 @@
     {
       id: "battle-neutral-mob",
       screen: "battle",
-      when: (s, ctx) => ctx && ctx.battle && ctx.battle.enemy.isNeutral && s.level <= MAX_LEVEL,
+      when: (s, ctx) => ctx && ctx.battle && ctx.battle.enemy.isNeutral && s.level <= MAX_LEVEL + 5,
       render: () => `
         <strong>No element here.</strong> This enemy doesn't have an
         element, so no super-effective bonus applies. Just hit hard!`,
@@ -174,7 +174,7 @@
     }
     container.style.display = "";
     container.innerHTML = `
-      <div class="coach-tip" data-tip-id="${tip.id}">
+      <div class="coach-tip" data-tip-id="${escapeHtml(tip.id)}">
         <span class="coach-tip__icon" aria-hidden="true">💡</span>
         <div class="coach-tip__body">${tip.render(state, ctx)}</div>
         <button class="coach-tip__close" aria-label="Dismiss tip">×</button>

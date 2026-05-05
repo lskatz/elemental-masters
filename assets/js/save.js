@@ -36,7 +36,7 @@
     return Storage.write(STORAGE_KEY, {
       format: FILE_FORMAT,
       version: CURRENT_VERSION,
-      savedAt: new Date().toISOString(),
+      exportedAt: new Date().toISOString(),
       state: state.toJSON(),
     });
   }

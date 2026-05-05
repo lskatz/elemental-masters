@@ -178,9 +178,15 @@
   }
 
   function ordinal(n) {
-    const s = ["th", "st", "nd", "rd"];
-    const v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    const abs = Math.abs(n);
+    const v = abs % 100;
+    if (v >= 11 && v <= 13) return n + "th";
+    switch (abs % 10) {
+      case 1: return n + "st";
+      case 2: return n + "nd";
+      case 3: return n + "rd";
+      default: return n + "th";
+    }
   }
 
   /**

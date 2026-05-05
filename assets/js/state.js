@@ -143,11 +143,13 @@
 
     gainEnergy(amount) {
       this.energy = Math.min(Balance.special_energy_max, this.energy + amount);
+      this.dirtyForExport = true;
     }
 
     spendEnergy(amount) {
       if (this.energy < amount) return false;
       this.energy -= amount;
+      this.dirtyForExport = true;
       return true;
     }
 
