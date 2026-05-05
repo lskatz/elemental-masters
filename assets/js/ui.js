@@ -251,6 +251,10 @@
     // ---- Battle screen ----------------------------------------------
 
     renderBattle({ state, battle, onAttack, onSpecial, onDefend, onEnd }) {
+      // Ensure buttons are never carried over in a locked state from a
+      // previous battle's end-of-turn animation.
+      this._setActionsLocked(false);
+
       // Hero panel
       $("#battle-hero-name").textContent = state.heroName;
       $("#battle-hero-emoji").textContent = state.activeEmoji;
