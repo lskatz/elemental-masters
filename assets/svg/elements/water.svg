@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="Water">
+  <defs>
+    <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b9eff"/>
+      <stop offset="100%" stop-color="#0b3a73"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 6 C 22 22, 14 32, 14 42 A 18 18 0 0 0 50 42 C 50 32, 42 22, 32 6 Z" fill="url(#g-water)" stroke="#0b3a73" stroke-width="2"/><ellipse cx="26" cy="36" rx="5" ry="8" fill="#ffffff" opacity="0.45"/>
+</svg>

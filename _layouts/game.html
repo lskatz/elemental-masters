@@ -1,0 +1,30 @@
+---
+# Game layout: extends `base` and loads the game scripts. Used only by the
+# main game page (index.html). Static content pages (help, etc.) use the
+# `base` or `help` layout instead so they don't pay the cost of loading
+# scripts they don't use.
+layout: base
+---
+{{ content }}
+
+{%- comment -%}
+  Script load order matters. Each module declares its globals (window.X)
+  and depends only on globals declared earlier:
+
+    generated-data.js  →  GameData
+    storage.js         →  GameStorage   (no other deps)
+    state.js           →  GameState, GameRules   (uses GameData)
+    save.js            →  GameSave      (uses GameStorage, GameState, GameData)
+    battle.js          →  Battle, Enemy (uses GameData, GameState, GameRules)
+    coach.js           →  Coach         (uses GameStorage, GameState)
+    ui.js              →  UI            (uses everything above except main)
+    main.js            →  entry point   (uses everything)
+{%- endcomment -%}
+<script src="{{ '/assets/js/generated-data.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/storage.js'        | relative_url }}"></script>
+<script src="{{ '/assets/js/state.js'          | relative_url }}"></script>
+<script src="{{ '/assets/js/save.js'           | relative_url }}"></script>
+<script src="{{ '/assets/js/battle.js'         | relative_url }}"></script>
+<script src="{{ '/assets/js/coach.js'          | relative_url }}"></script>
+<script src="{{ '/assets/js/ui.js'             | relative_url }}"></script>
+<script src="{{ '/assets/js/main.js'           | relative_url }}"></script>

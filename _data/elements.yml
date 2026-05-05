@@ -1,0 +1,183 @@
+# Source of truth for elemental data and game balance.
+# Read by scripts/build.py to generate:
+#   - assets/svg/elements/*.svg     (one icon per element)
+#   - assets/js/generated-data.js   (consumed by the game)
+#
+# Each element has:
+#   key:         internal id (also used as filename and CSS class)
+#   name:        display name
+#   emoji:       unicode emoji used for the boss avatar and element badge
+#   color:       primary hex color for theming
+#   color_dark:  darker shade for gradients
+#   weakness:    the element key that beats this one (must be symmetric)
+#   specials:    four special-attack names, one per tier (player levels
+#                1-5, 6-10, 11-15, 16+). Tier index = floor((level-1)/5).
+#   mobs:        list of {name, emoji} for varied regular enemies of this
+#                element. The game picks one at random per battle.
+#   boss_title:  title used when this element appears as a boss.
+
+elements:
+  - key: fire
+    name: Fire
+    emoji: "🔥"
+    color: "#ff5a1f"
+    color_dark: "#7a1d05"
+    weakness: water
+    specials: [Flame, Fireball, Inferno, Meteor]
+    boss_title: Master of Flames
+    mobs:
+      - { name: "Fire Imp",     emoji: "👿" }
+      - { name: "Ember Sprite", emoji: "✨" }
+      - { name: "Cinder Wolf",  emoji: "🐺" }
+      - { name: "Lava Pup",     emoji: "🐶" }
+
+  - key: water
+    name: Water
+    emoji: "💧"
+    color: "#3b9eff"
+    color_dark: "#0b3a73"
+    weakness: fire
+    specials: [Splash, Wave, Tsunami, Maelstrom]
+    boss_title: Master of Tides
+    mobs:
+      - { name: "Water Sprite",   emoji: "💧" }
+      - { name: "Reef Crab",      emoji: "🦀" }
+      - { name: "Tidal Imp",      emoji: "🐟" }
+      - { name: "Stream Serpent", emoji: "🐍" }
+
+  - key: wind
+    name: Wind
+    emoji: "💨"
+    color: "#a7d8ff"
+    color_dark: "#3a6a8a"
+    weakness: earth
+    specials: [Gust, Cyclone, Tornado, Hurricane]
+    boss_title: Master of Skies
+    mobs:
+      - { name: "Wind Wisp",   emoji: "💨" }
+      - { name: "Cloud Drake", emoji: "🐉" }
+      - { name: "Sky Sparrow", emoji: "🐦" }
+      - { name: "Gust Wraith", emoji: "👻" }
+
+  - key: earth
+    name: Earth
+    emoji: "🪨"
+    color: "#7a5a36"
+    color_dark: "#3a2a16"
+    weakness: wind
+    specials: [Pebble, Rockslide, Quake, Mountain Crush]
+    boss_title: Master of Stone
+    mobs:
+      - { name: "Earth Golem",     emoji: "🗿" }
+      - { name: "Stone Tortoise",  emoji: "🐢" }
+      - { name: "Boulder Beast",   emoji: "🪨" }
+      - { name: "Rock Worm",       emoji: "🪱" }
+
+  - key: lightning
+    name: Lightning
+    emoji: "⚡"
+    color: "#ffd23f"
+    color_dark: "#7a5e00"
+    weakness: dust
+    specials: [Spark, Bolt, Thunder, Storm]
+    boss_title: Master of Storms
+    mobs:
+      - { name: "Lightning Wisp", emoji: "⚡" }
+      - { name: "Volt Hound",     emoji: "🐕" }
+      - { name: "Spark Imp",      emoji: "✨" }
+      - { name: "Thunder Hawk",   emoji: "🦅" }
+
+  - key: dust
+    name: Dust
+    emoji: "🌫️"
+    color: "#d8c79a"
+    color_dark: "#6b5e3a"
+    weakness: lightning
+    specials: [Puff, Sandstorm, Duststorm, Desolation]
+    boss_title: Master of Sands
+    mobs:
+      - { name: "Dust Devil",   emoji: "🌪️" }
+      - { name: "Sand Lurker",  emoji: "🏜️" }
+      - { name: "Mirage Beast", emoji: "🐫" }
+      - { name: "Grit Wraith",  emoji: "👻" }
+
+  - key: ice
+    name: Ice
+    emoji: "❄️"
+    color: "#bfe9ff"
+    color_dark: "#3d6f8a"
+    weakness: lava
+    specials: [Frost, Icicle, Blizzard, Glacier]
+    boss_title: Master of Frost
+    mobs:
+      - { name: "Ice Imp",      emoji: "❄️" }
+      - { name: "Frost Wolf",   emoji: "🐺" }
+      - { name: "Snow Yeti",    emoji: "🦍" }
+      - { name: "Glacier Crab", emoji: "🦀" }
+
+  - key: lava
+    name: Lava
+    emoji: "🌋"
+    color: "#c92a1c"
+    color_dark: "#5a0a05"
+    weakness: ice
+    specials: [Ember, Magma, Eruption, Volcano]
+    boss_title: Master of Magma
+    mobs:
+      - { name: "Lava Hound",     emoji: "🔥" }
+      - { name: "Magma Slug",     emoji: "🐌" }
+      - { name: "Ash Demon",      emoji: "👹" }
+      - { name: "Volcanic Worm",  emoji: "🪱" }
+
+# Non-elemental mobs. They appear at a configurable rate (see balance below)
+# and are slightly stronger than elemental mobs because the weakness chart
+# can't be used against them. Bosses are always elemental.
+neutral_mobs:
+  - { name: "Cave Bat",     emoji: "🦇" }
+  - { name: "Dire Wolf",    emoji: "🐺" }
+  - { name: "Stone Ogre",   emoji: "👹" }
+  - { name: "Giant Spider", emoji: "🕷️" }
+  - { name: "Skeleton",     emoji: "💀" }
+  - { name: "Goblin",       emoji: "👺" }
+  - { name: "Pit Scorpion", emoji: "🦂" }
+  - { name: "Coiled Viper", emoji: "🐍" }
+
+# Game balance constants — change these to tune difficulty.
+balance:
+  hero_base_hp: 50
+  hero_hp_per_level: 10
+  hero_base_attack: 8
+  hero_attack_per_level: 2
+
+  mob_base_hp: 30
+  mob_hp_per_level: 7
+  mob_base_attack: 6
+  mob_attack_per_level: 1
+
+  boss_hp_multiplier: 2.5
+  boss_attack_multiplier: 1.5
+
+  # Damage multipliers when the player's element is super-effective.
+  super_effective_mob: 1.5
+  super_effective_boss: 2.0
+
+  # Special attack costs and damage.
+  special_energy_cost: 30
+  special_energy_max: 100
+  special_energy_per_attack: 20
+  special_damage_multiplier: 2.0
+
+  # Defend reduces incoming damage.
+  defend_damage_reduction: 0.5
+
+  # Probability that a non-boss encounter spawns a neutral (non-elemental)
+  # mob. Bosses are always elemental.
+  neutral_mob_chance: 0.25
+  # Stat boost for neutral mobs (compensates for not being weak to anything).
+  neutral_mob_hp_multiplier: 1.2
+  neutral_mob_attack_multiplier: 1.2
+
+  # Levels at which a new element slot is unlocked. The first element is
+  # chosen at game start, so unlocks happen at boss-clear levels (5, 10, 15).
+  element_unlock_levels: [5, 10, 15]
+  max_elements: 4

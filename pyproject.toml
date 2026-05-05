@@ -1,0 +1,9 @@
+# Minimal Python project metadata for development tooling.
+# This project ships no installable Python package — the build script in
+# scripts/build.py is invoked directly. This file exists so pytest can
+# discover the test suite and so contributors get consistent settings.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+python_files = ["test_*.py"]

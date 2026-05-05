@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="Wind">
+  <defs>
+    <linearGradient id="g-wind" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a7d8ff"/>
+      <stop offset="100%" stop-color="#3a6a8a"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#g-wind)" stroke-width="5" stroke-linecap="round"><path d="M10 22 H 40 A 6 6 0 1 0 34 16"/><path d="M8 34 H 50 A 7 7 0 1 0 42 27"/><path d="M14 46 H 36 A 5 5 0 1 0 30 41"/></g>
+</svg>

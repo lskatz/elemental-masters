@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="Ice">
+  <defs>
+    <linearGradient id="g-ice" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bfe9ff"/>
+      <stop offset="100%" stop-color="#3d6f8a"/>
+    </linearGradient>
+  </defs>
+  <g stroke="url(#g-ice)" stroke-width="3.5" stroke-linecap="round" fill="none"><line x1="32" y1="6"  x2="32" y2="58"/><line x1="9.5" y1="19" x2="54.5" y2="45"/><line x1="9.5" y1="45" x2="54.5" y2="19"/><path d="M32 12 L 27 7  M32 12 L 37 7"/><path d="M32 52 L 27 57 M32 52 L 37 57"/><path d="M48 22 L 50 16  M48 22 L 54 22"/><path d="M16 42 L 14 48  M16 42 L 10 42"/><path d="M16 22 L 10 22  M16 22 L 14 16"/><path d="M48 42 L 54 42  M48 42 L 50 48"/></g><circle cx="32" cy="32" r="3.5" fill="url(#g-ice)"/>
+</svg>

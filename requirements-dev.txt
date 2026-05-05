@@ -1,0 +1,12 @@
+# Python dev dependencies for Elemental Masters.
+#
+# Used for building game assets (SVGs, generated-data.js, PWA icons) and
+# running the test suite. The runtime game has no Python dependencies —
+# this file is only needed for development and CI.
+#
+# Install:  pip install -r requirements-dev.txt
+
+pyyaml >= 6.0           # parses _data/elements.yml
+pillow >= 10.0          # generates PWA icons in build.py
+pytest >= 7.0           # test runner for tests/test_build.py
+cairosvg >= 2.7         # renders SVGs for snapshot tests (test-only)

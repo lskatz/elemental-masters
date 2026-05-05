@@ -1,0 +1,20 @@
+---
+# Layout for the help page. Wraps markdown content in the `.app` container
+# so it picks up the same width/padding as the game, and adds a back-to-game
+# button at the top + bottom. Extends `base` (not `game`) so we don't load
+# the game JavaScript on a static doc page.
+layout: base
+---
+<main class="app help-page">
+  <header class="help-header">
+    <a href="{{ '/' | relative_url }}" class="btn btn--ghost help-back">← Back to game</a>
+    <h1>{{ page.title }}</h1>
+    {% if page.subtitle %}<p class="muted">{{ page.subtitle }}</p>{% endif %}
+  </header>
+
+  {{ content }}
+
+  <footer class="help-footer">
+    <a href="{{ '/' | relative_url }}" class="btn btn--primary">← Back to game</a>
+  </footer>
+</main>

@@ -1,0 +1,191 @@
+---
+layout: game
+title: Elemental Masters
+---
+<main class="app">
+  <!-- ============================================================ -->
+  <!--  TITLE SCREEN                                                -->
+  <!-- ============================================================ -->
+  <section id="screen-title" class="screen is-active">
+    <div class="title-stage">
+      <div class="title-emojis" aria-hidden="true">
+        <span>🔥</span><span>💧</span><span>💨</span><span>🪨</span>
+        <span>⚡</span><span>❄️</span><span>🌋</span><span>🌫️</span>
+      </div>
+      <h1 class="title-logo">Elemental<br><em>Masters</em></h1>
+      <p class="title-tagline">Choose your element. Master your power.</p>
+
+      <label class="field">
+        <span class="field__label">Hero Name</span>
+        <input type="text" id="hero-name-input" class="field__input"
+               placeholder="Enter your name" maxlength="16" autocomplete="off">
+      </label>
+
+      <div class="title-actions">
+        <button id="btn-new-game"  class="btn btn--primary">New Game</button>
+        <button id="btn-continue"  class="btn btn--secondary">Continue</button>
+        <label class="btn btn--ghost" for="import-file">
+          Load Save File
+          <input type="file" id="import-file" accept=".json,application/json" hidden>
+        </label>
+      </div>
+
+      <p class="title-version">v<span id="title-version-num"></span></p>
+      <p><a href="{{ '/help/' | relative_url }}" class="title-help-link">How to play</a></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  ELEMENT SELECT (initial pick + later unlocks)               -->
+  <!-- ============================================================ -->
+  <section id="screen-element" class="screen">
+    <header class="screen__header">
+      <h2 id="element-title">Choose Your Element</h2>
+      <p id="element-subtitle" class="muted"></p>
+    </header>
+    <div id="element-grid" class="element-grid"></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  HUB                                                         -->
+  <!-- ============================================================ -->
+  <section id="screen-hub" class="screen">
+    <header class="hub-header">
+      <div class="hub-header__name">
+        <span class="muted">Hero</span>
+        <strong id="hub-hero-name"></strong>
+      </div>
+      <div class="hub-header__stats">
+        <span><span class="muted">Level</span> <strong id="hub-level"></strong></span>
+        <span><span class="muted">Wins</span> <strong id="hub-wins"></strong></span>
+      </div>
+    </header>
+
+    <!-- Coaching tip — populated by coach.js, hidden when no tip applies.
+         role="status" + aria-live="polite" lets screen readers announce
+         tips when they appear without interrupting the user. -->
+    <div id="hub-coach" class="coach-slot" role="status" aria-live="polite"></div>
+
+    <div class="hub-active-card">
+      <div class="hub-active-card__icon">
+        <span id="hub-active-emoji" aria-hidden="true"></span>
+      </div>
+      <div class="hub-active-card__body">
+        <p class="muted">Active Element</p>
+        <h3 id="hub-active-name"></h3>
+        <p>Special: <strong id="hub-special-name"></strong>
+           <span id="hub-tier" class="pill"></span></p>
+      </div>
+    </div>
+
+    <div id="hub-element-switcher" class="element-switcher is-hidden"></div>
+
+    <div class="hub-next">
+      <p class="muted">Next boss</p>
+      <p><strong id="hub-next-boss"></strong></p>
+    </div>
+
+    <button id="btn-start-battle" class="btn btn--primary btn--large"></button>
+
+    <div class="hub-actions">
+      <button id="btn-export" class="btn btn--ghost">💾 Save to File</button>
+      <button id="btn-reset"  class="btn btn--ghost danger">🗑 Reset Game</button>
+    </div>
+    <p class="hub-help-link">
+      <a href="{{ '/help/' | relative_url }}">❔ How to play</a>
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  BOSS INTRO                                                  -->
+  <!-- ============================================================ -->
+  <section id="screen-boss-intro" class="screen">
+    <div class="boss-intro">
+      <p class="boss-intro__label">⚠ Boss Battle</p>
+      <div class="boss-intro__avatar">
+        <span id="boss-intro-emoji" aria-hidden="true"></span>
+      </div>
+      <h2 id="boss-intro-title"></h2>
+      <p id="boss-intro-hint" class="boss-intro__hint"></p>
+      <button id="btn-boss-continue" class="btn btn--primary btn--large">Begin Battle</button>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  BATTLE                                                      -->
+  <!-- ============================================================ -->
+  <section id="screen-battle" class="screen">
+    <div id="battle-board" class="battle-board">
+      <div id="battle-enemy-card" class="combatant combatant--enemy">
+        <span id="battle-boss-tag" class="boss-tag is-hidden">BOSS</span>
+        <div class="combatant__avatar">
+          <span id="battle-enemy-emoji" aria-hidden="true"></span>
+        </div>
+        <p class="combatant__name" id="battle-enemy-name"></p>
+        <div id="battle-enemy-hp" class="bar bar--enemy">
+          <div class="bar__fill"></div>
+          <span class="bar__label"></span>
+        </div>
+      </div>
+
+      <div class="battle-vs" aria-hidden="true">
+        <span>VS</span>
+      </div>
+
+      <div id="battle-hero-card" class="combatant combatant--hero">
+        <div class="combatant__avatar">
+          <span id="battle-hero-emoji" aria-hidden="true"></span>
+        </div>
+        <p class="combatant__name" id="battle-hero-name"></p>
+        <div id="battle-hero-hp" class="bar bar--hp">
+          <div class="bar__fill"></div>
+          <span class="bar__label"></span>
+        </div>
+        <div id="battle-hero-energy" class="bar bar--energy">
+          <div class="bar__fill"></div>
+          <span class="bar__label"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coaching tip — populated by coach.js, hidden when no tip applies. -->
+    <div id="battle-coach" class="coach-slot" role="status" aria-live="polite"></div>
+
+    <div id="battle-log" class="battle-log" aria-live="polite"></div>
+
+    <div class="battle-actions">
+      <button id="btn-attack"  class="btn btn--primary action-btn">⚔ Attack</button>
+      <button id="btn-special" class="btn btn--special action-btn" disabled>
+        ✨ <span id="btn-special-label">Special</span>
+      </button>
+      <button id="btn-defend"  class="btn btn--secondary action-btn">🛡 Defend</button>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  VICTORY                                                     -->
+  <!-- ============================================================ -->
+  <section id="screen-victory" class="screen">
+    <div class="result-card result-card--win">
+      <h2 id="victory-title">Victory!</h2>
+      <p id="victory-message" class="muted"></p>
+      <dl class="result-stats">
+        <div><dt>Level</dt><dd id="victory-level"></dd></div>
+        <div><dt>Wins</dt><dd id="victory-wins"></dd></div>
+      </dl>
+      <button id="btn-victory-continue" class="btn btn--primary btn--large"></button>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  DEFEAT                                                      -->
+  <!-- ============================================================ -->
+  <section id="screen-defeat" class="screen">
+    <div class="result-card result-card--lose">
+      <h2>Defeated</h2>
+      <p class="muted">You were beaten by <strong id="defeat-enemy-name"></strong>.</p>
+      <p>Don't give up! Try again — your HP is full.</p>
+      <button id="btn-defeat-retry" class="btn btn--primary btn--large">Retry Battle</button>
+    </div>
+  </section>
+</main>

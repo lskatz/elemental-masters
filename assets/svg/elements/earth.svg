@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="Earth">
+  <defs>
+    <linearGradient id="g-earth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a5a36"/>
+      <stop offset="100%" stop-color="#3a2a16"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 50 L 22 28 L 32 38 L 44 18 L 58 50 Z" fill="url(#g-earth)" stroke="#3a2a16" stroke-width="2" stroke-linejoin="round"/><path d="M22 28 L 32 38 L 44 18 L 38 18 L 32 30 L 24 26 Z" fill="#ffffff" opacity="0.25"/>
+</svg>

@@ -1,0 +1,37 @@
+# Jekyll configuration for Elemental Masters
+# Deployed as a project page at https://lskatz.github.io/elemental-masters/
+
+title: Elemental Masters
+description: A never-ending elemental battling game.
+url: "https://lskatz.github.io"
+baseurl: "/elemental-masters"
+
+# Game version (semver) — used for save-file compatibility checks.
+# Bump this when the save format changes.
+game_version: "1.0.0"
+
+# Build settings
+markdown: kramdown
+plugins: []
+
+# Files and directories Jekyll should NOT copy into the built site.
+# Anything that isn't part of the player-facing site goes here.
+exclude:
+  - scripts/
+  - tests/
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - package.json
+  - pyproject.toml
+  - vendor/
+  - .bundle/
+  - node_modules/
+  - .pytest_cache/
+  - .editorconfig
+  - .github/
+
+# Sass settings — Jekyll compiles assets/css/style.scss automatically
+sass:
+  style: compressed
+  sass_dir: assets/css
