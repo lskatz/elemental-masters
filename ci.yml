@@ -1,0 +1,127 @@
+# CI/CD for Elemental Masters.
+#
+# On every push to main and on pull requests, run the Python and JS unit
+# tests. If they pass and the push is on main, build the Jekyll site and
+# deploy to GitHub Pages.
+#
+# Enable Pages deployment by setting Settings -> Pages -> Source to
+# "GitHub Actions" in the repo on github.com.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, but don't cancel in-progress runs;
+# we want pushes during a deploy to queue up rather than abort it.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Test job: runs on every push + PR. Both Python and JS unit tests run in
+  # the same job because they share most of the setup and the test suites
+  # are small. If either fails, the build/deploy job is skipped.
+  # -------------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: pip install -r requirements-dev.txt
+
+      - name: Run Python tests
+        run: python -m pytest tests/ -v
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run JS tests
+        # Node's built-in test runner — no npm install needed.
+        run: node --test tests/js/*.test.js
+
+  # -------------------------------------------------------------------------
+  # Build job: only runs on push to main, and only after tests pass. Runs
+  # the Python pre-build, then Jekyll build, and uploads the output as a
+  # Pages artifact for the deploy job.
+  # -------------------------------------------------------------------------
+  build:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: pip install -r requirements-dev.txt
+
+      - name: Generate assets (SVGs + JS data)
+        run: python3 scripts/build.py
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build Jekyll site
+        # Pass --baseurl from Pages so links resolve correctly when the
+        # repo lives at lskatz.github.io/elemental-masters/.
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Check performance budget
+        # Fail the build if any file exceeds its size limit or if total
+        # transferred bytes go above the global ceiling. Catches accidental
+        # asset bloat (large images, unminified JS, etc.) before deploy.
+        run: python3 scripts/check_size.py --site _site/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  # -------------------------------------------------------------------------
+  # Deploy job: publishes the artifact to GitHub Pages.
+  # -------------------------------------------------------------------------
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
