@@ -246,10 +246,11 @@ def validate_elements(elements: list[dict]) -> list[str]:
             errors.append(f"duplicate element key: {el['key']}")
         keys.add(el["key"])
 
-        if not isinstance(el["specials"], list) or len(el["specials"]) != 4:
+        specials = el.get("specials")
+        if not isinstance(specials, list) or len(specials) != 4:
             errors.append(
                 f"{el['key']}: must have exactly 4 specials "
-                f"(got {len(el.get('specials', []))})"
+                f"(got {len(specials) if isinstance(specials, list) else 0})"
             )
 
         mobs = el.get("mobs", [])

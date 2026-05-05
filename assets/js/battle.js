@@ -8,7 +8,6 @@
  * Event shapes:
  *   { type: "log",     text: "..." }
  *   { type: "damage",  target: "hero"|"enemy", amount: N, super: bool, defended: bool }
- *   { type: "miss",    target: "hero"|"enemy" }
  *   { type: "energy",  amount: N }
  *   { type: "special", name: "Fireball" }
  *   { type: "end",     winner: "hero"|"enemy", wasBoss: bool }
@@ -147,7 +146,7 @@
     playerAttack() {
       if (this._ended) return [];
       const events = [];
-      const dmg = this._computeDamage(this.state.attack, false);
+      const dmg = this._computeDamage(this.state.attack);
       this.enemy.takeDamage(dmg.amount);
       this.state.gainEnergy(Balance.special_energy_per_attack);
       events.push({ type: "log",
@@ -169,10 +168,11 @@
       if (!this.state.canSpecial()) {
         return [{ type: "log", text: "Not enough energy yet!" }];
       }
-      this.state.spendEnergy(Balance.special_energy_cost);
+      if (!this.state.spendEnergy(Balance.special_energy_cost)) {
+        return [{ type: "log", text: "Not enough energy yet!" }];
+      }
       const dmg = this._computeDamage(
-        this.state.attack * Balance.special_damage_multiplier,
-        false
+        this.state.attack * Balance.special_damage_multiplier
       );
       this.enemy.takeDamage(dmg.amount);
 
@@ -232,11 +232,11 @@
 
     // ---- Damage calculation --------------------------------------------
 
-    _computeDamage(baseAmount, ignoreSuperEffective) {
+    _computeDamage(baseAmount) {
       let amount = baseAmount;
       let isSuper = false;
 
-      if (!ignoreSuperEffective && this.isSuperEffective()) {
+      if (this.isSuperEffective()) {
         const mul = this.enemy.isBoss
           ? Balance.super_effective_boss
           : Balance.super_effective_mob;

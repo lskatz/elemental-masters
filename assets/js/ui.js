@@ -168,7 +168,7 @@
       $("#hub-hero-name").textContent = state.heroName;
       $("#hub-level").textContent = state.level;
       $("#hub-wins").textContent = state.wins;
-      const nextBoss = 5 - ((state.level - 1) % 5);
+      const nextBoss = 5 - (state.level % 5);
       $("#hub-next-boss").textContent =
         Rules.isBossLevel(state.level) ? "BOSS!" : `${nextBoss} battle${nextBoss === 1 ? "" : "s"} away`;
 
@@ -250,7 +250,7 @@
 
     // ---- Battle screen ----------------------------------------------
 
-    renderBattle({ state, battle, onAttack, onSpecial, onDefend, onEnd }) {
+    renderBattle({ state, battle, onEnd }) {
       // Ensure buttons are never carried over in a locked state from a
       // previous battle's end-of-turn animation.
       this._setActionsLocked(false);
@@ -372,7 +372,10 @@
     },
 
     _setActionsLocked(locked) {
-      $$(".action-btn").forEach(b => b.classList.toggle("is-locked", locked));
+      $$(".action-btn").forEach(b => {
+        b.classList.toggle("is-locked", locked);
+        b.disabled = locked;
+      });
     },
 
     _setBar(sel, current, max) {
