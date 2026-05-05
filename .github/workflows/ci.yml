@@ -1,7 +1,7 @@
 # CI/CD for Elemental Masters.
 #
-# On every push to main and on pull requests, run the Python and JS unit
-# tests. If they pass and the push is on main, build the Jekyll site and
+# On every push to master and on pull requests, run the Python and JS unit
+# tests. If they pass and the push is on master, build the Jekyll site and
 # deploy to GitHub Pages.
 #
 # Enable Pages deployment by setting Settings -> Pages -> Source to
@@ -58,13 +58,13 @@ jobs:
         run: node --test tests/js/*.test.js
 
   # -------------------------------------------------------------------------
-  # Build job: only runs on push to main, and only after tests pass. Runs
+  # Build job: only runs on push to master, and only after tests pass. Runs
   # the Python pre-build, then Jekyll build, and uploads the output as a
   # Pages artifact for the deploy job.
   # -------------------------------------------------------------------------
   build:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -114,7 +114,7 @@ jobs:
   # -------------------------------------------------------------------------
   deploy:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
