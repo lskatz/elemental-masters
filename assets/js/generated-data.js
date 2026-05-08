@@ -5,7 +5,7 @@
  * Exposes a single global, GameData, used by the rest of the game JS.
  */
 window.GameData = {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "elements": [
     {
       "key": "fire",

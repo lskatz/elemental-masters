@@ -7,7 +7,7 @@
  * Save file format:
  *   {
  *     "format":     "elemental-masters-save",
- *     "version":    "1.0.0",                // game semver at export time
+ *     "version":    "1.1.0",                // game semver at export time
  *     "exportedAt": "2026-05-04T12:00:00Z",
  *     "state":      { ...GameState.toJSON() }
  *   }
