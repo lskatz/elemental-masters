@@ -16,7 +16,7 @@ standalone-window experience.
 
 1. Pick a hero name and a starting element.
 2. Battle mobs to level up. Every 5 levels you face a **boss** — beat them
-   to unlock a new element (up to 4 total).
+   to unlock a new element until you own the full set.
 3. The game auto-saves to your browser. Use the **Save to File** button
    for a JSON backup.
 
@@ -35,6 +35,11 @@ the live site).
 | 🌫️ Dust     | ⚡ Lightning |
 | ❄️ Ice      | 🌋 Lava     |
 | 🌋 Lava     | ❄️ Ice      |
+| 🌑 Darkness | 🧠 Psychic  |
+| 🧠 Psychic  | 🌑 Darkness |
+| ⚙️ Metal    | 🌬️ Air      |
+| 🌬️ Air      | ⚙️ Metal    |
+| 🌀 Vortex   | 🌀 Vortex   |
 
 ---
 
@@ -324,7 +329,7 @@ Notable scenarios:
 - **storage.js** — namespacing, JSON round-trip, graceful failure when
   storage is unavailable
 - **state.js** — derived stats (tier, special name), level-up effects,
-  element-unlock cap at 4, defeat HP reset, JSON round-trip with old
+  boss-based element unlocks until full ownership, defeat HP reset, JSON round-trip with old
   saves missing fields, and corruption resistance (unknown elements,
   negative numbers, non-string heroName)
 - **save.js** — localStorage round-trip, version compatibility, JSON
@@ -510,11 +515,11 @@ A few conventions to keep things tidy:
 1. Add an entry to `_data/elements.yml` with all required fields,
    including a `mobs` list of 4 entries.
 2. Add an SVG body to the `body_by_key` dict in `scripts/build.py`.
-3. Pair its `weakness` symmetrically with another new element (elements
-   come in pairs — both must be added together).
+3. Keep `weakness` relationships symmetric (`A -> B` means `B -> A`, or a
+   deliberate self-counter like `vortex -> vortex`).
 4. The validator will catch most mistakes (asymmetric weaknesses, missing
    mobs, malformed colors). Run `python3 scripts/build.py` to verify.
-5. Add the new pair to the help-page chart in `help.md`.
+5. Add the new relationship(s) to the help-page chart in `help.md`.
 
 ### Reporting bugs
 

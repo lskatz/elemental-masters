@@ -48,9 +48,14 @@ Each element has a **weakness**. Attack with the element that beats your enemy a
 | 🌫️ Dust          | ⚡ Lightning   |
 | ❄️ Ice           | 🌋 Lava       |
 | 🌋 Lava          | ❄️ Ice        |
+| 🌑 Darkness      | 🧠 Psychic    |
+| 🧠 Psychic       | 🌑 Darkness   |
+| ⚙️ Metal         | 🌬️ Air        |
+| 🌬️ Air          | ⚙️ Metal      |
+| 🌀 Vortex        | 🌀 Vortex     |
 {:.help-chart}
 
-Each pair beats the other — so if water beats fire, fire also beats water. Remember the four pairs and you remember the whole chart!
+Most elements come in two-way pairs — if water beats fire, fire also beats water. Vortex is unstable and counters itself.
 {:.muted}
 
 
@@ -75,8 +80,8 @@ Every 5th level is a boss. Bosses are always elemental, and their weakness gets 
 ## 📈 Leveling Up
 
 - Win a battle → gain a level. Your HP refills automatically.
-- At levels **5, 10, and 15**, you fight a boss. Beating them unlocks a new element you can use.
-- You can hold up to **4 elements**. Switch between owned elements at the hub.
+- Every **5th level** is a boss. Beating any boss unlocks one new element until you've collected them all.
+- You can eventually hold the **full element roster**. Switch between owned elements at the hub.
 - Every 5 levels, your special attack upgrades. Fire goes Flame → Fireball → Inferno → Meteor!
 
 

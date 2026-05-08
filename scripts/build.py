@@ -185,6 +185,46 @@ def svg_for(element: dict) -> str:
             f'<circle cx="14" cy="50" r="2" fill="{fill}"/>'
             f'<circle cx="50" cy="50" r="2" fill="{fill}"/>'
         ),
+        "darkness": (
+            f'<circle cx="32" cy="32" r="20" fill="{fill}" stroke="{stroke}" stroke-width="2"/>'
+            f'<circle cx="38" cy="26" r="16" fill="#0b0618" opacity="0.85"/>'
+            f'<circle cx="24" cy="22" r="2" fill="#ffffff" opacity="0.6"/>'
+            f'<circle cx="44" cy="40" r="1.8" fill="#ffffff" opacity="0.5"/>'
+        ),
+        "psychic": (
+            f'<ellipse cx="32" cy="32" rx="20" ry="15" fill="{fill}" stroke="{stroke}" stroke-width="2"/>'
+            f'<path d="M18 32 C 22 24, 28 22, 32 22 C 36 22, 42 24, 46 32" '
+            f'fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.7"/>'
+            f'<path d="M18 32 C 22 40, 28 42, 32 42 C 36 42, 42 40, 46 32" '
+            f'fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.7"/>'
+            f'<circle cx="32" cy="32" r="4" fill="#ffffff" opacity="0.8"/>'
+        ),
+        "metal": (
+            f'<g fill="{fill}" stroke="{stroke}" stroke-width="2" stroke-linejoin="round">'
+            f'<path d="M32 10 L 40 16 L 48 16 L 54 24 L 54 32 L 48 40 '
+            f'L 48 48 L 40 54 L 32 54 L 24 48 L 16 48 L 10 40 L 10 32 '
+            f'L 16 24 L 16 16 L 24 10 Z"/>'
+            f'</g>'
+            f'<circle cx="32" cy="32" r="8" fill="{stroke}"/>'
+            f'<circle cx="32" cy="32" r="3" fill="#e8edf7"/>'
+        ),
+        "air": (
+            f'<g fill="none" stroke="{fill}" stroke-width="4" stroke-linecap="round">'
+            f'<path d="M10 26 C 20 18, 34 18, 50 24"/>'
+            f'<path d="M12 34 C 24 28, 40 30, 54 38"/>'
+            f'<path d="M14 44 C 26 40, 38 42, 50 50"/>'
+            f'</g>'
+            f'<circle cx="22" cy="20" r="3" fill="{fill}" opacity="0.7"/>'
+        ),
+        "vortex": (
+            f'<g fill="none" stroke="{fill}" stroke-width="3.2" stroke-linecap="round">'
+            f'<path d="M50 32 C 50 20, 38 14, 29 18 C 20 22, 20 32, 28 35 '
+            f'C 36 38, 40 34, 39 30 C 38 26, 33 25, 30 27"/>'
+            f'<path d="M52 36 C 48 48, 36 54, 24 50 C 12 46, 8 34, 12 24 '
+            f'C 16 14, 28 8, 40 11"/>'
+            f'</g>'
+            f'<circle cx="30" cy="29" r="2.5" fill="{stroke}"/>'
+        ),
     }
 
     if key not in body_by_key:
@@ -227,8 +267,8 @@ def validate_elements(elements: list[dict]) -> list[str]:
 
     if not isinstance(elements, list):
         return ["'elements' must be a list"]
-    if len(elements) != 8:
-        errors.append(f"Expected 8 elements, got {len(elements)}")
+    if len(elements) < 2:
+        errors.append(f"Expected at least 2 elements, got {len(elements)}")
 
     keys = set()
     for i, el in enumerate(elements):

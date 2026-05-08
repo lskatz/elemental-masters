@@ -46,7 +46,7 @@ def make_valid_element(key: str, weakness: str, **overrides) -> dict:
 
 
 def make_valid_data() -> dict:
-    """Build a minimal valid data dict (8 elements, paired weaknesses)."""
+    """Build a minimal valid data dict (paired weaknesses)."""
     pairs = [
         ("fire", "water"),
         ("water", "fire"),
@@ -146,8 +146,8 @@ class TestValidateElements:
 
     def test_wrong_count(self):
         data = make_valid_data()
-        errors = build.validate_elements(data["elements"][:7])
-        assert any("Expected 8 elements" in e for e in errors)
+        errors = build.validate_elements(data["elements"][:1])
+        assert any("Expected at least 2 elements" in e for e in errors)
 
     def test_missing_required_key(self):
         data = make_valid_data()
