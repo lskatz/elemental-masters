@@ -247,7 +247,7 @@ balance:
   neutral_mob_hp_multiplier: 1.2
   neutral_mob_attack_multiplier: 1.2
 
-  # Legacy pacing knob retained for compatibility; unlocks now happen after
-  # every boss until all elements are owned.
+  # Retained for backward compatibility in generated balance data; gameplay
+  # now unlocks after every boss until all elements are owned.
   element_unlock_levels: [5, 10, 15]
   max_elements: 13

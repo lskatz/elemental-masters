@@ -41,6 +41,8 @@ the live site).
 | 🌬️ Air      | ⚙️ Metal    |
 | 🌀 Vortex   | 🌀 Vortex   |
 
+Most relationships are two-way pairs. Vortex is the exception and counters itself.
+
 ---
 
 ## Architecture
@@ -188,7 +190,7 @@ All knobs live under `balance:` in `_data/elements.yml`. Common edits:
 | Faster level-ups            | lower `mob_base_hp` / `mob_hp_per_level` |
 | More forgiving specials     | lower `special_energy_cost`       |
 | More/fewer neutral mobs     | adjust `neutral_mob_chance` (0..1) |
-| Change unlock pacing        | edit `element_unlock_levels`      |
+| Change element roster size  | edit `elements` and `max_elements` together |
 
 Re-run `python3 scripts/build.py` after editing.
 
