@@ -129,6 +129,76 @@ elements:
       - { name: "Ash Demon",      emoji: "👹" }
       - { name: "Volcanic Worm",  emoji: "🪱" }
 
+  - key: darkness
+    name: Darkness
+    emoji: "🌑"
+    color: "#5a4b8a"
+    color_dark: "#1a1233"
+    weakness: psychic
+    specials: [Gloom, Nightfall, Shadow Nova, Abyss]
+    boss_title: Master of Night
+    mobs:
+      - { name: "Shadow Imp",    emoji: "👿" }
+      - { name: "Night Stalker", emoji: "🦇" }
+      - { name: "Umbral Hound",  emoji: "🐺" }
+      - { name: "Void Wraith",   emoji: "👻" }
+
+  - key: psychic
+    name: Psychic
+    emoji: "🧠"
+    color: "#ff7de9"
+    color_dark: "#6e1f61"
+    weakness: darkness
+    specials: [Mind Tap, Brainwave, Psionic Burst, Astral Crush]
+    boss_title: Master of Minds
+    mobs:
+      - { name: "Thought Sprite",  emoji: "✨" }
+      - { name: "Mind Leech",      emoji: "🪱" }
+      - { name: "Dream Seer",      emoji: "🦉" }
+      - { name: "Astral Phantom",  emoji: "👻" }
+
+  - key: metal
+    name: Metal
+    emoji: "⚙️"
+    color: "#b0b7c3"
+    color_dark: "#4a5466"
+    weakness: air
+    specials: [Clang, Ironclad, Steel Tempest, Titanium Crush]
+    boss_title: Master of Iron
+    mobs:
+      - { name: "Gearling",      emoji: "⚙️" }
+      - { name: "Iron Beetle",   emoji: "🪲" }
+      - { name: "Steel Sentinel", emoji: "🤖" }
+      - { name: "Tin Titan",     emoji: "🛡️" }
+
+  - key: air
+    name: Air
+    emoji: "🌬️"
+    color: "#d9f3ff"
+    color_dark: "#5d87a6"
+    weakness: metal
+    specials: [Breeze, Jetstream, Updraft, Sky Rend]
+    boss_title: Master of Currents
+    mobs:
+      - { name: "Breeze Sprite", emoji: "🌬️" }
+      - { name: "Jet Hawk",      emoji: "🦅" }
+      - { name: "Draft Serpent", emoji: "🐍" }
+      - { name: "Aero Wisp",     emoji: "💠" }
+
+  - key: vortex
+    name: Vortex
+    emoji: "🌀"
+    color: "#6a35ff"
+    color_dark: "#1b0a52"
+    weakness: vortex
+    specials: [Warp, Portal Rift, Event Horizon, Singularity]
+    boss_title: Master of Portals
+    mobs:
+      - { name: "Rift Imp",      emoji: "🌀" }
+      - { name: "Portal Mimic",  emoji: "🪞" }
+      - { name: "Void Drifter",  emoji: "👾" }
+      - { name: "Gravity Warden", emoji: "🕳️" }
+
 # Non-elemental mobs. They appear at a configurable rate (see balance below)
 # and are slightly stronger than elemental mobs because the weakness chart
 # can't be used against them. Bosses are always elemental.
@@ -177,7 +247,7 @@ balance:
   neutral_mob_hp_multiplier: 1.2
   neutral_mob_attack_multiplier: 1.2
 
-  # Levels at which a new element slot is unlocked. The first element is
-  # chosen at game start, so unlocks happen at boss-clear levels (5, 10, 15).
+  # Retained for backward compatibility in generated balance data; gameplay
+  # now unlocks after every boss until all elements are owned.
   element_unlock_levels: [5, 10, 15]
-  max_elements: 4
+  max_elements: 13

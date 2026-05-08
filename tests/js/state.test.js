@@ -114,34 +114,23 @@ test("GameState: onVictory levels up, full heals, resets energy", () => {
   assert.equal(s.wins, 1);
 });
 
-test("GameState: onVictory(true) signals unlockableElement on first 3 bosses", () => {
-  const { GameState } = loadGame();
+test("GameState: onVictory(true) signals unlockableElement until all elements are owned", () => {
+  const { GameState, GameData } = loadGame();
   const s = new GameState("H", "fire");
+  const toGrant = GameData.elements.map((el) => el.key).filter((k) => k !== "fire");
+  let r = null;
 
-  // Boss at level 5 -> unlock #2
-  s.level = 5;
-  let r = s.onVictory(true);
-  assert.equal(r.unlockableElement, true);
-  s.grantElement("water");
+  toGrant.forEach((key, i) => {
+    s.level = (i + 1) * 5;
+    r = s.onVictory(true);
+    assert.equal(r.unlockableElement, true, "each boss should unlock until full set owned");
+    assert.equal(s.grantElement(key), true);
+  });
 
-  // Boss at 10 -> unlock #3
-  s.level = 10;
+  s.level = (toGrant.length + 1) * 5;
   r = s.onVictory(true);
-  assert.equal(r.unlockableElement, true);
-  s.grantElement("ice");
-
-  // Boss at 15 -> unlock #4
-  s.level = 15;
-  r = s.onVictory(true);
-  assert.equal(r.unlockableElement, true);
-  s.grantElement("wind");
-
-  // Boss at 20 -> already at cap, no unlock
-  s.level = 20;
-  r = s.onVictory(true);
-  assert.equal(r.unlockableElement, false,
-    "no 5th unlock once at max_elements cap");
-  assert.equal(s.ownedElements.length, 4);
+  assert.equal(r.unlockableElement, false, "no unlock after owning every element");
+  assert.equal(s.ownedElements.length, GameData.elements.length);
 });
 
 test("GameState: onVictory marks newTier at level transitions", () => {
@@ -171,20 +160,21 @@ test("GameState: onDefeat fully heals for a retry", () => {
 // ---------------------------------------------------------------------------
 
 test("GameState: grantElement adds new, rejects duplicates and overflow", () => {
-  const { GameState } = loadGame();
+  const { GameState, GameData } = loadGame();
   const s = new GameState("H", "fire");
 
   assert.equal(s.grantElement("fire"), false, "cannot regrant existing");
   assert.equal(s.ownedElements.length, 1);
 
-  assert.equal(s.grantElement("water"), true);
-  assert.equal(s.grantElement("ice"), true);
-  assert.equal(s.grantElement("wind"), true);
-  assert.equal(s.ownedElements.length, 4);
+  const allOtherKeys = GameData.elements.map((el) => el.key).filter((k) => k !== "fire");
+  allOtherKeys.forEach((key) => {
+    assert.equal(s.grantElement(key), true);
+  });
+  assert.equal(s.ownedElements.length, GameData.elements.length);
 
-  // 5th is over the cap
-  assert.equal(s.grantElement("earth"), false, "rejects beyond max_elements");
-  assert.equal(s.ownedElements.length, 4);
+  // Any extra grant beyond full set is rejected.
+  assert.equal(s.grantElement("not-real"), false, "rejects once all elements are already owned");
+  assert.equal(s.ownedElements.length, GameData.elements.length);
 });
 
 test("GameState: setActive throws on unowned element, sets owned ones", () => {

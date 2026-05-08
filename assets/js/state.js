@@ -100,17 +100,8 @@
         result.newTier = true;
       }
 
-      // Element-unlock levels are post-boss. We unlock after the level number
-      // matches a value in element_unlock_levels (i.e., player just cleared
-      // the level-5 boss and is now level 6 — unlock at boss-beat time).
-      // Simpler: when bossesBeaten increases, check if we should unlock.
-      const unlockSlots = Balance.element_unlock_levels.length; // 3
-      const canHaveMore = this.ownedElements.length < Balance.max_elements;
-      if (
-        wasBoss &&
-        this.bossesBeaten <= unlockSlots &&
-        canHaveMore
-      ) {
+      const canHaveMore = this.ownedElements.length < Elements.length;
+      if (wasBoss && canHaveMore) {
         result.unlockableElement = true;
       }
 
@@ -128,7 +119,7 @@
     /** Add a new element to the owned list. */
     grantElement(elementKey) {
       if (this.ownedElements.includes(elementKey)) return false;
-      if (this.ownedElements.length >= Balance.max_elements) return false;
+      if (this.ownedElements.length >= Elements.length) return false;
       this.ownedElements.push(elementKey);
       this.dirtyForExport = true;
       return true;

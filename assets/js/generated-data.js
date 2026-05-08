@@ -5,7 +5,7 @@
  * Exposes a single global, GameData, used by the rest of the game JS.
  */
 window.GameData = {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "elements": [
     {
       "key": "fire",
@@ -270,6 +270,171 @@ window.GameData = {
           "emoji": "\ud83e\udeb1"
         }
       ]
+    },
+    {
+      "key": "darkness",
+      "name": "Darkness",
+      "emoji": "\ud83c\udf11",
+      "color": "#5a4b8a",
+      "color_dark": "#1a1233",
+      "weakness": "psychic",
+      "specials": [
+        "Gloom",
+        "Nightfall",
+        "Shadow Nova",
+        "Abyss"
+      ],
+      "boss_title": "Master of Night",
+      "mobs": [
+        {
+          "name": "Shadow Imp",
+          "emoji": "\ud83d\udc7f"
+        },
+        {
+          "name": "Night Stalker",
+          "emoji": "\ud83e\udd87"
+        },
+        {
+          "name": "Umbral Hound",
+          "emoji": "\ud83d\udc3a"
+        },
+        {
+          "name": "Void Wraith",
+          "emoji": "\ud83d\udc7b"
+        }
+      ]
+    },
+    {
+      "key": "psychic",
+      "name": "Psychic",
+      "emoji": "\ud83e\udde0",
+      "color": "#ff7de9",
+      "color_dark": "#6e1f61",
+      "weakness": "darkness",
+      "specials": [
+        "Mind Tap",
+        "Brainwave",
+        "Psionic Burst",
+        "Astral Crush"
+      ],
+      "boss_title": "Master of Minds",
+      "mobs": [
+        {
+          "name": "Thought Sprite",
+          "emoji": "\u2728"
+        },
+        {
+          "name": "Mind Leech",
+          "emoji": "\ud83e\udeb1"
+        },
+        {
+          "name": "Dream Seer",
+          "emoji": "\ud83e\udd89"
+        },
+        {
+          "name": "Astral Phantom",
+          "emoji": "\ud83d\udc7b"
+        }
+      ]
+    },
+    {
+      "key": "metal",
+      "name": "Metal",
+      "emoji": "\u2699\ufe0f",
+      "color": "#b0b7c3",
+      "color_dark": "#4a5466",
+      "weakness": "air",
+      "specials": [
+        "Clang",
+        "Ironclad",
+        "Steel Tempest",
+        "Titanium Crush"
+      ],
+      "boss_title": "Master of Iron",
+      "mobs": [
+        {
+          "name": "Gearling",
+          "emoji": "\u2699\ufe0f"
+        },
+        {
+          "name": "Iron Beetle",
+          "emoji": "\ud83e\udeb2"
+        },
+        {
+          "name": "Steel Sentinel",
+          "emoji": "\ud83e\udd16"
+        },
+        {
+          "name": "Tin Titan",
+          "emoji": "\ud83d\udee1\ufe0f"
+        }
+      ]
+    },
+    {
+      "key": "air",
+      "name": "Air",
+      "emoji": "\ud83c\udf2c\ufe0f",
+      "color": "#d9f3ff",
+      "color_dark": "#5d87a6",
+      "weakness": "metal",
+      "specials": [
+        "Breeze",
+        "Jetstream",
+        "Updraft",
+        "Sky Rend"
+      ],
+      "boss_title": "Master of Currents",
+      "mobs": [
+        {
+          "name": "Breeze Sprite",
+          "emoji": "\ud83c\udf2c\ufe0f"
+        },
+        {
+          "name": "Jet Hawk",
+          "emoji": "\ud83e\udd85"
+        },
+        {
+          "name": "Draft Serpent",
+          "emoji": "\ud83d\udc0d"
+        },
+        {
+          "name": "Aero Wisp",
+          "emoji": "\ud83d\udca0"
+        }
+      ]
+    },
+    {
+      "key": "vortex",
+      "name": "Vortex",
+      "emoji": "\ud83c\udf00",
+      "color": "#6a35ff",
+      "color_dark": "#1b0a52",
+      "weakness": "vortex",
+      "specials": [
+        "Warp",
+        "Portal Rift",
+        "Event Horizon",
+        "Singularity"
+      ],
+      "boss_title": "Master of Portals",
+      "mobs": [
+        {
+          "name": "Rift Imp",
+          "emoji": "\ud83c\udf00"
+        },
+        {
+          "name": "Portal Mimic",
+          "emoji": "\ud83e\ude9e"
+        },
+        {
+          "name": "Void Drifter",
+          "emoji": "\ud83d\udc7e"
+        },
+        {
+          "name": "Gravity Warden",
+          "emoji": "\ud83d\udd73\ufe0f"
+        }
+      ]
     }
   ],
   "neutralMobs": [
@@ -332,7 +497,7 @@ window.GameData = {
       10,
       15
     ],
-    "max_elements": 4
+    "max_elements": 13
   },
   "elementIndex": {
     "fire": 0,
@@ -342,7 +507,12 @@ window.GameData = {
     "lightning": 4,
     "dust": 5,
     "ice": 6,
-    "lava": 7
+    "lava": 7,
+    "darkness": 8,
+    "psychic": 9,
+    "metal": 10,
+    "air": 11,
+    "vortex": 12
   },
   "weaknessOf": {
     "fire": "water",
@@ -352,6 +522,11 @@ window.GameData = {
     "lightning": "dust",
     "dust": "lightning",
     "ice": "lava",
-    "lava": "ice"
+    "lava": "ice",
+    "darkness": "psychic",
+    "psychic": "darkness",
+    "metal": "air",
+    "air": "metal",
+    "vortex": "vortex"
   }
 };
