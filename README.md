@@ -41,7 +41,7 @@ the live site).
 | 🌬️ Air      | ⚙️ Metal    |
 | 🌀 Vortex   | 🌀 Vortex   |
 
-Most relationships are two-way pairs. Vortex is the exception because its weakness is itself (self-countering).
+Most relationships are two-way mutual weaknesses (`A` beats `B`, and `B` beats `A`). Vortex is the exception because its weakness is itself (self-countering).
 
 ---
 
