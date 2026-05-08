@@ -85,6 +85,21 @@ body {
   overflow-x: hidden;
 }
 
+.site-version {
+  position: fixed;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 5;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--text-2);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 700;
