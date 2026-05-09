@@ -9,8 +9,8 @@ permalink: /help/
 
 1. **Type your hero's name** on the title screen.
 2. Tap **New Game** and pick the element you want to start with.
-3. From the hub, tap **Start Battle**. Use Attack, Special, or Defend until one side runs out of HP.
-4. Win battles to level up. Every 5 levels you fight a **boss** — beat them to unlock a new element!
+3. Explore the **world map**. Move around to trigger mob encounters, visit the **Elemental Shrine**, and scout the **Wildlands**.
+4. Win battles to level up. Every 5 levels, challenge the boss at the **Boss Arena** to unlock a new element.
 
 
 ## ⚔ Battle Controls
@@ -87,11 +87,11 @@ Every 5th level is a boss. Bosses are always elemental, and their weakness gets 
 
 ## 💾 Saving Your Game
 
-The game saves automatically to your browser every time something important happens — leveling up, switching elements, beating a boss. Closing the tab is fine; come back any time and tap **Continue**.
+The game saves automatically to your browser every time something important happens — moving, leveling up, switching elements, beating a boss. Closing the tab is fine; come back any time and tap **Continue**.
 
 <div class="help-card" markdown="1">
 ### Saving to a file
-Tap **💾 Save to File** on the hub to download a backup. Useful for:
+Tap **💾 Save to File** on the map screen to download a backup. Useful for:
 
 - Moving to a different device or browser.
 - Keeping a backup in case your browser clears its data.
@@ -108,5 +108,5 @@ To load a save, tap **Load Save File** on the title screen and pick the JSON fil
 
 - **Save your special for tough enemies.** Bosses and neutral mobs hit hard. Specials do double damage and end fights faster.
 - **Defend before a boss's big hit** if your HP is getting low. Half damage is much better than a knockout.
-- **Switch elements at the hub** if you know a boss is coming up. Fighting a fire boss with water is way easier than with earth.
+- **Visit the Elemental Shrine** before a boss. You can switch elements there and pick up a blessing for your next battle.
 - **Don't worry about losing!** You go right back to the same battle with full HP. Try a different strategy.

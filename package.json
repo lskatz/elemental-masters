@@ -1,6 +1,6 @@
 {
   "name": "elemental-masters",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Browser-based elemental battle game built as a Jekyll site. The game runs as plain ES2020 in the browser; Node is only used for unit tests via the built-in `node --test` runner.",
   "homepage": "https://lskatz.github.io/elemental-masters/",

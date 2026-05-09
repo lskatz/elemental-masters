@@ -36,6 +36,11 @@
 
       this.hp = this.maxHp;   // start at full HP
       this.energy = 0;        // builds up from attacks; spent on specials
+      // Overworld map position (3x3 grid). Center spawn.
+      this.mapX = 1;
+      this.mapY = 1;
+      // Shrine blessing charges (consumed at battle start).
+      this.shrineBlessing = 0;
 
       // Tracks whether changes have been made since the last JSON export.
       // localStorage autosave is independent of this flag.
@@ -148,8 +153,40 @@
       return this.energy >= Balance.special_energy_cost;
     }
 
+    hasShrineBlessing() {
+      return this.shrineBlessing > 0;
+    }
+
     isDefeated() {
       return this.hp <= 0;
+    }
+
+    /**
+     * Move on the overworld map. Coordinates are clamped to a 3x3 grid.
+     * Returns true if the position changed.
+     */
+    moveOnMap(dx, dy) {
+      const nextX = Math.max(0, Math.min(2, this.mapX + Number(dx || 0)));
+      const nextY = Math.max(0, Math.min(2, this.mapY + Number(dy || 0)));
+      const moved = nextX !== this.mapX || nextY !== this.mapY;
+      if (!moved) return false;
+      this.mapX = nextX;
+      this.mapY = nextY;
+      this.dirtyForExport = true;
+      return true;
+    }
+
+    grantShrineBlessing() {
+      this.shrineBlessing = 1;
+      this.dirtyForExport = true;
+      return true;
+    }
+
+    consumeShrineBlessing() {
+      if (this.shrineBlessing <= 0) return false;
+      this.shrineBlessing -= 1;
+      this.dirtyForExport = true;
+      return true;
     }
 
     // ---- Serialization --------------------------------------------------
@@ -165,6 +202,9 @@
         bossesBeaten: this.bossesBeaten,
         hp: this.hp,
         energy: this.energy,
+        mapX: this.mapX,
+        mapY: this.mapY,
+        shrineBlessing: this.shrineBlessing,
       };
     }
 
@@ -216,6 +256,11 @@
         Number(data.energy) || 0,
         Balance.special_energy_max,
       ));
+      const parsedX = Number(data.mapX);
+      const parsedY = Number(data.mapY);
+      s.mapX = Math.max(0, Math.min(2, Number.isFinite(parsedX) ? parsedX : 1));
+      s.mapY = Math.max(0, Math.min(2, Number.isFinite(parsedY) ? parsedY : 1));
+      s.shrineBlessing = Math.max(0, Math.min(1, Number(data.shrineBlessing) || 0));
 
       s.dirtyForExport = false;
       return s;

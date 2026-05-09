@@ -47,45 +47,51 @@ title: Elemental Masters
   </section>
 
   <!-- ============================================================ -->
-  <!--  HUB                                                         -->
+  <!--  WORLD MAP                                                   -->
   <!-- ============================================================ -->
-  <section id="screen-hub" class="screen">
+  <section id="screen-map" class="screen">
     <header class="hub-header">
       <div class="hub-header__name">
         <span class="muted">Hero</span>
-        <strong id="hub-hero-name"></strong>
+        <strong id="map-hero-name"></strong>
       </div>
       <div class="hub-header__stats">
-        <span><span class="muted">Level</span> <strong id="hub-level"></strong></span>
-        <span><span class="muted">Wins</span> <strong id="hub-wins"></strong></span>
+        <span><span class="muted">Level</span> <strong id="map-level"></strong></span>
+        <span><span class="muted">Wins</span> <strong id="map-wins"></strong></span>
       </div>
     </header>
 
-    <!-- Coaching tip — populated by coach.js, hidden when no tip applies.
-         role="status" + aria-live="polite" lets screen readers announce
-         tips when they appear without interrupting the user. -->
-    <div id="hub-coach" class="coach-slot" role="status" aria-live="polite"></div>
+    <div id="map-coach" class="coach-slot" role="status" aria-live="polite"></div>
 
     <div class="hub-active-card">
       <div class="hub-active-card__icon">
-        <span id="hub-active-emoji" aria-hidden="true"></span>
+        <span id="map-active-emoji" aria-hidden="true"></span>
       </div>
       <div class="hub-active-card__body">
         <p class="muted">Active Element</p>
-        <h3 id="hub-active-name"></h3>
-        <p>Special: <strong id="hub-special-name"></strong>
-           <span id="hub-tier" class="pill"></span></p>
+        <h3 id="map-active-name"></h3>
+        <p>Special: <strong id="map-special-name"></strong>
+           <span id="map-tier" class="pill"></span></p>
       </div>
     </div>
 
-    <div id="hub-element-switcher" class="element-switcher is-hidden"></div>
+    <div id="map-element-switcher" class="element-switcher is-hidden"></div>
 
-    <div class="hub-next">
-      <p class="muted">Next boss</p>
-      <p><strong id="hub-next-boss"></strong></p>
+    <div class="map-card">
+      <p class="muted map-card__title">Overworld</p>
+      <div id="map-grid" class="map-grid" aria-label="Overworld map"></div>
+      <p id="map-location-name" class="map-location-name"></p>
+      <p id="map-danger" class="muted map-danger"></p>
+      <div class="map-controls" aria-label="Move hero">
+        <button id="btn-move-up" class="btn btn--secondary map-controls__up">⬆ Move Up</button>
+        <button id="btn-move-left" class="btn btn--secondary">⬅ Move Left</button>
+        <button id="btn-move-right" class="btn btn--secondary">➡ Move Right</button>
+        <button id="btn-move-down" class="btn btn--secondary map-controls__down">⬇ Move Down</button>
+      </div>
+      <button id="btn-map-action" class="btn btn--primary btn--large is-hidden"></button>
     </div>
 
-    <button id="btn-start-battle" class="btn btn--primary btn--large"></button>
+    <div id="shrine-chart" class="help-card is-hidden"></div>
 
     <div class="hub-actions">
       <button id="btn-export" class="btn btn--ghost">💾 Save to File</button>
@@ -108,6 +114,20 @@ title: Elemental Masters
       <h2 id="boss-intro-title"></h2>
       <p id="boss-intro-hint" class="boss-intro__hint"></p>
       <button id="btn-boss-continue" class="btn btn--primary btn--large">Begin Battle</button>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  MAP → BATTLE TRANSITION                                     -->
+  <!-- ============================================================ -->
+  <section id="screen-transition" class="screen">
+    <div class="map-transition">
+      <p class="muted">Encounter!</p>
+      <div class="map-transition__avatar">
+        <span id="transition-enemy-emoji" aria-hidden="true"></span>
+      </div>
+      <h2 id="transition-enemy-name"></h2>
+      <p class="map-transition__hint">Moving from the overworld into battle...</p>
     </div>
   </section>
 

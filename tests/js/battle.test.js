@@ -227,3 +227,27 @@ test("Battle: combat ends when hero HP hits zero", () => {
   assert.ok(end);
   assert.equal(end.winner, "enemy");
 });
+
+test("Battle: levelOffset raises enemy battle level for map danger", () => {
+  const { Battle, GameState } = loadGame();
+  const s = new GameState("H", "fire");
+  const normal = new Battle(s, { rng: seededRng([0.99, 0.0, 0.0]) });
+  const danger = new Battle(s, { rng: seededRng([0.99, 0.0, 0.0]), levelOffset: 2 });
+  assert.equal(danger.enemy.level, s.level + 2);
+  assert.ok(danger.enemy.maxHp > normal.enemy.maxHp);
+});
+
+test("Battle: shrine blessing boosts damage and is consumed on battle start", () => {
+  const { Battle, GameState } = loadGame();
+  const s1 = new GameState("H", "fire");
+  const b1 = new Battle(s1, { rng: seededRng([0.99, 0.0, 0.0, 0.5, 0.5]) });
+  const e1 = b1.playerAttack().find(e => e.type === "damage" && e.target === "enemy");
+
+  const s2 = new GameState("H", "fire");
+  s2.grantShrineBlessing();
+  const b2 = new Battle(s2, { rng: seededRng([0.99, 0.0, 0.0, 0.5, 0.5]) });
+  const e2 = b2.playerAttack().find(e => e.type === "damage" && e.target === "enemy");
+
+  assert.equal(s2.hasShrineBlessing(), false, "consumed when battle starts");
+  assert.ok(e2.amount > e1.amount, `blessed damage ${e2.amount} should be > ${e1.amount}`);
+});

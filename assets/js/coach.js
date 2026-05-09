@@ -47,10 +47,9 @@
       screen: "hub",
       when: (s) => s.level === 1 && s.wins === 0,
       render: (s) => `
-        <strong>Welcome, ${escapeHtml(s.heroName)}!</strong> This is your hub.
-        From here you start battles, see your level, and switch elements
-        once you have more than one. Tap <strong>Start Battle</strong>
-        when you're ready.`,
+        <strong>Welcome, ${escapeHtml(s.heroName)}!</strong> This is your world map.
+        Walk around with the move buttons to explore landmarks and trigger
+        encounters. Visit the shrine for buffs and the wildlands for more mobs.`,
     },
     {
       id: "hub-after-first-win",
@@ -59,7 +58,7 @@
       render: () => `
         <strong>Great job!</strong> You won your first battle and your HP
         refilled automatically. Keep going — every 5 levels you'll meet a
-        boss who unlocks a new element when you beat them.`,
+        boss at the Boss Arena who unlocks a new element when you beat them.`,
     },
     {
       id: "hub-pre-boss",
@@ -68,7 +67,7 @@
       render: () => `
         <strong>Boss alert!</strong> The next battle is a boss. Bosses are
         tougher, but they tell you their element so you can prepare.
-        Right now you only have one element — just fight your best!`,
+        Walk to the Boss Arena and challenge them when ready!`,
     },
     {
       id: "hub-multi-element",
