@@ -79,16 +79,19 @@ title: Elemental Masters
 
     <div class="map-card">
       <p class="muted map-card__title">Overworld</p>
-      <div id="map-grid" class="map-grid" aria-label="Overworld map"></div>
+      <div id="map-grid" class="map-grid" aria-label="Overworld map">
+        <div id="map-player" class="map-player" aria-hidden="true">
+          <span id="map-player-emoji" class="map-player__emoji">🧙</span>
+        </div>
+      </div>
       <p id="map-location-name" class="map-location-name"></p>
       <p id="map-danger" class="muted map-danger"></p>
       <div class="map-controls" aria-label="Move hero">
         <button id="btn-move-up" class="btn btn--secondary map-controls__up">⬆ Move Up</button>
-        <button id="btn-move-left" class="btn btn--secondary">⬅ Move Left</button>
-        <button id="btn-move-right" class="btn btn--secondary">➡ Move Right</button>
+        <button id="btn-move-left" class="btn btn--secondary map-controls__left">⬅ Move Left</button>
+        <button id="btn-move-right" class="btn btn--secondary map-controls__right">➡ Move Right</button>
         <button id="btn-move-down" class="btn btn--secondary map-controls__down">⬇ Move Down</button>
       </div>
-      <button id="btn-map-action" class="btn btn--primary btn--large is-hidden"></button>
     </div>
 
     <div id="shrine-chart" class="help-card is-hidden"></div>

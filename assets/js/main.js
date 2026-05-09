@@ -88,26 +88,29 @@
       landmarks: LANDMARKS,
       onMove: (dx, dy) => {
         const moved = state.moveOnMap(dx, dy);
-        if (!moved) return;
+        if (!moved) return { moved: false };
         autosave();
-        const encounter = rollEncounter(state);
-        if (encounter) {
-          enterBattle({ withTransition: true, levelOffset: encounter.levelOffset });
-          return;
-        }
-        goToMap();
-      },
-      onChallengeBoss: () => {
-        if (!window.GameRules.isBossLevel(state.level)) {
-          window.UI.toast("The Boss Arena is quiet for now.", "error");
-          return;
-        }
-        enterBattle({ withTransition: true, levelOffset: 0 });
-      },
-      onBlessAtShrine: () => {
-        state.grantShrineBlessing();
-        autosave("The shrine grants a blessing.");
-        goToMap();
+        return {
+          moved: true,
+          onArrive: () => {
+            if (isAtLandmark(state, LANDMARKS.shrine) && !state.hasShrineBlessing()) {
+              state.grantShrineBlessing();
+              autosave("The shrine grants a blessing.");
+            }
+
+            const encounter = rollEncounter(state);
+            if (encounter) {
+              if (encounter.type === "boss_not_ready") {
+                window.UI.toast("The Boss Arena is quiet for now.", "error");
+                goToMap();
+                return;
+              }
+              enterBattle({ withTransition: true, levelOffset: encounter.levelOffset });
+              return;
+            }
+            goToMap();
+          },
+        };
       },
       onSwitchElement: (key) => {
         state.setActive(key);
@@ -213,8 +216,14 @@
   }
 
   function rollEncounter(s) {
-    if (isAtLandmark(s, LANDMARKS.shrine) || isAtLandmark(s, LANDMARKS.boss)) {
+    if (isAtLandmark(s, LANDMARKS.shrine)) {
       return null;
+    }
+    if (isAtLandmark(s, LANDMARKS.boss)) {
+      if (!window.GameRules.isBossLevel(s.level)) {
+        return { type: "boss_not_ready" };
+      }
+      return { levelOffset: 0 };
     }
     const distanceToBoss = Math.abs(s.mapX - LANDMARKS.boss.x) + Math.abs(s.mapY - LANDMARKS.boss.y);
     const danger = Math.max(0, 3 - Math.min(3, distanceToBoss));

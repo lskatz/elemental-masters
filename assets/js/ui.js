@@ -169,8 +169,6 @@
       state,
       landmarks,
       onMove,
-      onChallengeBoss,
-      onBlessAtShrine,
       onSwitchElement,
       onExport,
       onReset,
@@ -227,25 +225,33 @@
         for (let x = 0; x < 3; x++) {
           const tile = document.createElement("div");
           tile.className = "map-tile";
+          tile.style.left = `calc(${x} * (var(--map-cell-size) + var(--map-gap)))`;
+          tile.style.top = `calc(${y} * (var(--map-cell-size) + var(--map-gap)))`;
           const lm = landmarkAt(x, y);
           if (lm) tile.classList.add(`is-${lm}`);
-          if (state.mapX === x && state.mapY === y) tile.classList.add("is-player");
           const lmLabel = lm === "shrine" ? "Shrine"
             : lm === "wildlands" ? "Wildlands"
             : lm === "boss" ? "Boss Arena"
             : "";
           tile.innerHTML = `
             <span class="map-tile__landmark">${lmLabel}</span>
-            <span class="map-tile__player" aria-hidden="true">${state.mapX === x && state.mapY === y ? "🧙" : ""}</span>
           `;
           grid.appendChild(tile);
         }
       }
 
+      const playerEl = document.createElement("div");
+      playerEl.id = "map-player";
+      playerEl.className = "map-player";
+      playerEl.setAttribute("aria-hidden", "true");
+      playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji">${activeEl.emoji}</span>`;
+      grid.appendChild(playerEl);
+      playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
+      playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
       const locationName = $("#map-location-name");
       const dangerEl = $("#map-danger");
-      const actionBtn = $("#btn-map-action");
       const shrineChart = $("#shrine-chart");
 
       const isBossTime = Rules.isBossLevel(state.level);
@@ -253,12 +259,7 @@
         locationName.textContent = "⛩️ Elemental Shrine";
         dangerEl.textContent = state.hasShrineBlessing()
           ? "Blessing ready: your next battle deals bonus damage."
-          : "Receive a blessing to empower your next battle.";
-        actionBtn.textContent = "✨ Receive Shrine Blessing";
-        actionBtn.classList.remove("is-hidden");
-        actionBtn.classList.remove("is-boss");
-        actionBtn.disabled = false;
-        actionBtn.onclick = onBlessAtShrine;
+          : "Step here to receive a blessing for your next battle.";
         shrineChart.classList.remove("is-hidden");
         const chartRows = Elements.map(el => {
           const weak = Elements[ElementIndex[el.weakness]];
@@ -276,17 +277,9 @@
         if (currentLandmark === "boss") {
           locationName.textContent = "🏛️ Boss Arena";
           dangerEl.textContent = isBossTime
-            ? "The current boss is waiting."
+            ? "Step onto this tile to challenge the current boss."
             : "No boss is here yet. Win battles to reach the next boss level.";
-          actionBtn.textContent = `⚔️ ${isBossTime ? "Challenge Boss" : "Boss Not Ready"}`;
-          actionBtn.classList.remove("is-hidden");
-          actionBtn.classList.toggle("is-boss", isBossTime);
-          actionBtn.disabled = !isBossTime;
-          actionBtn.onclick = onChallengeBoss;
         } else {
-          actionBtn.classList.add("is-hidden");
-          actionBtn.classList.remove("is-boss");
-          actionBtn.disabled = false;
           locationName.textContent = currentLandmark === "wildlands"
             ? "🌲 The Wildlands"
             : "🗺️ Open Terrain";
@@ -296,10 +289,54 @@
         }
       }
 
-      $("#btn-move-up").onclick = () => onMove(0, -1);
-      $("#btn-move-down").onclick = () => onMove(0, 1);
-      $("#btn-move-left").onclick = () => onMove(-1, 0);
-      $("#btn-move-right").onclick = () => onMove(1, 0);
+      const moveButtons = [
+        $("#btn-move-up"),
+        $("#btn-move-down"),
+        $("#btn-move-left"),
+        $("#btn-move-right"),
+      ];
+      const setMoveButtonsDisabled = (disabled) => {
+        moveButtons.forEach((btn) => {
+          if (btn) btn.disabled = disabled;
+        });
+      };
+      let isWalking = false;
+      const runMove = (dx, dy) => {
+        if (isWalking) return;
+        const result = onMove(dx, dy);
+        if (!result || !result.moved) return;
+
+        isWalking = true;
+        setMoveButtonsDisabled(true);
+        playerEl.classList.add("is-walking");
+        playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
+        playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+
+        let done = false;
+        const finishMove = () => {
+          if (done) return;
+          done = true;
+          isWalking = false;
+          setMoveButtonsDisabled(false);
+          playerEl.classList.remove("is-walking");
+          if (typeof result.onArrive === "function") result.onArrive();
+        };
+        const onTransitionDone = (ev) => {
+          if (ev.target !== playerEl || ev.propertyName !== "transform") return;
+          playerEl.removeEventListener("transitionend", onTransitionDone);
+          finishMove();
+        };
+        playerEl.addEventListener("transitionend", onTransitionDone);
+        _setTimeout(() => {
+          playerEl.removeEventListener("transitionend", onTransitionDone);
+          finishMove();
+        }, 500);
+      };
+
+      $("#btn-move-up").onclick = () => runMove(0, -1);
+      $("#btn-move-down").onclick = () => runMove(0, 1);
+      $("#btn-move-left").onclick = () => runMove(-1, 0);
+      $("#btn-move-right").onclick = () => runMove(1, 0);
 
       $("#btn-export").onclick = onExport;
       $("#btn-reset").onclick = onReset;
