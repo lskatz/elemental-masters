@@ -15,9 +15,11 @@ standalone-window experience.
 ## How to play (short version)
 
 1. Pick a hero name and a starting element.
-2. Battle mobs to level up. Every 5 levels you face a **boss** — beat them
-   to unlock a new element until you own the full set.
-3. The game auto-saves to your browser. Use the **Save to File** button
+2. Explore the map to trigger mob fights, visit the Elemental Shrine, and
+   approach the Boss Arena.
+3. Every 5 levels you can challenge a **boss** — beat them to unlock a new
+   element until you own the full set.
+4. The game auto-saves to your browser. Use the **Save to File** button
    for a JSON backup.
 
 For the full guide see [`help.md`](./help.md) (rendered at `/help/` on
@@ -145,11 +147,11 @@ alone — there's no bundler, no module system, just well-named globals.
 `main.js` is a tiny state machine that transitions between screens:
 
 ```
-title ─[New Game]→ element-select ─[pick]→ hub
-title ─[Continue]→ hub
-hub   ─[Start Battle]→ [boss-intro?] → battle ─[win]→ victory ─→ hub
-                                              ─[lose]→ defeat  ─→ battle (retry)
-victory (after boss) ─[unlock]→ element-select → hub
+title ─[New Game]→ element-select ─[pick]→ map
+title ─[Continue]→ map
+map   ─[encounter/challenge]→ [boss-intro?] → battle ─[win]→ victory ─→ map
+                                                     ─[lose]→ defeat  ─→ battle (retry)
+victory (after boss) ─[unlock]→ element-select → map
 ```
 
 `currentBattle` holds the in-progress `Battle` object so retries can
@@ -423,7 +425,7 @@ To enable, set **Settings → Pages → Source = GitHub Actions** in the repo.
 
 - **Auto-save:** `localStorage`, on every meaningful state change. Survives
   closing the tab; lost if the browser clears site data.
-- **Manual export:** the **Save to File** button on the hub downloads a
+- **Manual export:** the **Save to File** button on the map screen downloads a
   versioned JSON file. Load it on another device or after clearing
   storage.
 - **Compatibility:** loads only saves with the same MAJOR semver. Bump

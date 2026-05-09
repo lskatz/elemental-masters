@@ -114,9 +114,12 @@
       const opts = options || {};
       this.state = state;
       this._rng = opts.rng || Math.random;
-      this.enemy = new Enemy(state.level, Rules.isBossLevel(state.level), this._rng);
+      this.levelOffset = Math.max(0, Number(opts.levelOffset) || 0);
+      this.battleLevel = state.level + this.levelOffset;
+      this.enemy = new Enemy(this.battleLevel, Rules.isBossLevel(state.level), this._rng);
       this._defending = false;
       this._ended = false;
+      this._shrineBlessed = this.state.consumeShrineBlessing();
     }
 
     // ---- Information helpers (used by UI for the boss intro screen) ----
@@ -242,6 +245,10 @@
           : Balance.super_effective_mob;
         amount *= mul;
         isSuper = true;
+      }
+
+      if (this._shrineBlessed) {
+        amount *= 1.2;
       }
 
       // Small randomness (+/-15%) so battles aren't deterministic.

@@ -2,10 +2,10 @@
  * main.js — Entry point. Wires state, battle, save, and UI together.
  *
  * The Game object is a small state machine:
- *   title -> [new game] -> element-select -> hub
- *   title -> [continue] -> hub
- *   hub   -> battle  -> victory  -> hub  (or element-select on unlock)
- *                    -> defeat   -> battle (retry same level)
+ *   title -> [new game] -> element-select -> map
+ *   title -> [continue] -> map
+ *   map   -> [encounter] -> battle  -> victory  -> map  (or element-select on unlock)
+ *                            └──────> defeat   -> battle (retry same level)
  *
  * `currentBattle` holds the in-progress Battle (so retries can rebuild it).
  * ========================================================================== */
@@ -19,6 +19,11 @@
   let state = null;
   /** The active Battle, or null when not in combat. */
   let currentBattle = null;
+  const LANDMARKS = {
+    shrine: { x: 0, y: 0 },
+    wildlands: { x: 0, y: 2 },
+    boss: { x: 2, y: 2 },
+  };
 
   // ---- Boot ------------------------------------------------------------
 
@@ -49,7 +54,7 @@
       onPick: (elementKey) => {
         state = new window.GameState(name, elementKey);
         autosave("Game started!");
-        goToHub();
+        goToMap();
       },
     });
   }
@@ -61,7 +66,7 @@
       return;
     }
     state = loaded;
-    goToHub();
+    goToMap();
   }
 
   function importSaveFile(file) {
@@ -69,22 +74,45 @@
       .then(loaded => {
         state = loaded;
         autosave("Save imported!");
-        goToHub();
+        goToMap();
       })
       .catch(err => {
         window.UI.toast(err.message || "Could not load save.", "error");
       });
   }
 
-  function goToHub() {
+  function goToMap() {
     currentBattle = null;
-    window.UI.renderHub({
+    window.UI.renderMap({
       state,
-      onStartBattle: enterBattle,
+      landmarks: LANDMARKS,
+      onMove: (dx, dy) => {
+        const moved = state.moveOnMap(dx, dy);
+        if (!moved) return;
+        autosave();
+        const encounter = rollEncounter(state);
+        if (encounter) {
+          enterBattle({ withTransition: true, levelOffset: encounter.levelOffset });
+          return;
+        }
+        goToMap();
+      },
+      onChallengeBoss: () => {
+        if (!window.GameRules.isBossLevel(state.level)) {
+          window.UI.toast("The Boss Arena is quiet for now.", "error");
+          return;
+        }
+        enterBattle({ withTransition: true, levelOffset: 0 });
+      },
+      onBlessAtShrine: () => {
+        state.grantShrineBlessing();
+        autosave("The shrine grants a blessing.");
+        goToMap();
+      },
       onSwitchElement: (key) => {
         state.setActive(key);
         autosave();
-        goToHub();
+        goToMap();
       },
       onExport: () => {
         const fname = Save.exportToFile(state);
@@ -104,20 +132,31 @@
     });
   }
 
-  function enterBattle() {
-    currentBattle = new window.Battle(state);
-    if (currentBattle.enemy.isBoss) {
-      const wKey = currentBattle.weaknessKey();
-      const wEl = window.GameData.elements[window.GameData.elementIndex[wKey]];
-      window.UI.renderBossIntro({
+  function enterBattle(options) {
+    const opts = options || {};
+    currentBattle = new window.Battle(state, { levelOffset: opts.levelOffset || 0 });
+    const begin = () => {
+      if (currentBattle.enemy.isBoss) {
+        const wKey = currentBattle.weaknessKey();
+        const wEl = window.GameData.elements[window.GameData.elementIndex[wKey]];
+        window.UI.renderBossIntro({
+          enemy: currentBattle.enemy,
+          weaknessEl: wEl,
+          playerHas: currentBattle.playerHasWeakness(),
+          onContinue: showBattleScreen,
+        });
+      } else {
+        showBattleScreen();
+      }
+    };
+    if (opts.withTransition) {
+      window.UI.renderEncounterTransition({
         enemy: currentBattle.enemy,
-        weaknessEl: wEl,
-        playerHas: currentBattle.playerHasWeakness(),
-        onContinue: showBattleScreen,
+        onContinue: begin,
       });
-    } else {
-      showBattleScreen();
+      return;
     }
+    begin();
   }
 
   function showBattleScreen() {
@@ -146,11 +185,11 @@
               onPick: (elementKey) => {
                 state.grantElement(elementKey);
                 autosave("New element unlocked!");
-                goToHub();
+                goToMap();
               },
             });
           } else {
-            goToHub();
+            goToMap();
           }
         },
       });
@@ -167,6 +206,22 @@
         },
       });
     }
+  }
+
+  function isAtLandmark(s, lm) {
+    return s.mapX === lm.x && s.mapY === lm.y;
+  }
+
+  function rollEncounter(s) {
+    if (isAtLandmark(s, LANDMARKS.shrine) || isAtLandmark(s, LANDMARKS.boss)) {
+      return null;
+    }
+    const distanceToBoss = Math.abs(s.mapX - LANDMARKS.boss.x) + Math.abs(s.mapY - LANDMARKS.boss.y);
+    const danger = Math.max(0, 3 - Math.min(3, distanceToBoss));
+    const inWildlands = isAtLandmark(s, LANDMARKS.wildlands);
+    const chance = Math.min(0.9, 0.18 + (danger * 0.14) + (inWildlands ? 0.22 : 0));
+    if (Math.random() > chance) return null;
+    return { levelOffset: Math.max(0, danger + (inWildlands ? 1 : 0)) };
   }
 
   // ---- Helpers ---------------------------------------------------------

@@ -4,7 +4,7 @@
  * The game has these screens, each a top-level <section class="screen">:
  *   #screen-title      — name input, new/load/import
  *   #screen-element    — element picker (start + unlock)
- *   #screen-hub        — between-battles dashboard
+ *   #screen-map        — overworld exploration and landmarks
  *   #screen-boss-intro — pre-fight boss reveal with hint
  *   #screen-battle     — turn-based combat
  *   #screen-victory    — post-win results
@@ -35,6 +35,7 @@
   const FLASH_DURATION = 600;   // ms
   const FLOAT_DURATION = 1000;  // ms — damage number lifetime
   const END_PAUSE = 400;        // ms — pause before screen transition on battle end
+  const MAP_TRANSITION_DURATION = 900; // ms
   const TOAST_DURATION = 2400;  // ms — toast on-screen lifetime
   const TOAST_FADE = 300;       // ms — toast fade-out before removal
   const LOG_MAX_LINES = 50;     // cap battle-log size to avoid unbounded growth
@@ -162,25 +163,31 @@
       this.showScreen("screen-element");
     },
 
-    // ---- Hub --------------------------------------------------------
+    // ---- Overworld map ----------------------------------------------
 
-    renderHub({ state, onStartBattle, onSwitchElement, onExport, onReset }) {
-      $("#hub-hero-name").textContent = state.heroName;
-      $("#hub-level").textContent = state.level;
-      $("#hub-wins").textContent = state.wins;
-      const nextBoss = 5 - (state.level % 5);
-      $("#hub-next-boss").textContent =
-        Rules.isBossLevel(state.level) ? "BOSS!" : `${nextBoss} battle${nextBoss === 1 ? "" : "s"} away`;
+    renderMap({
+      state,
+      landmarks,
+      onMove,
+      onChallengeBoss,
+      onBlessAtShrine,
+      onSwitchElement,
+      onExport,
+      onReset,
+    }) {
+      $("#map-hero-name").textContent = state.heroName;
+      $("#map-level").textContent = state.level;
+      $("#map-wins").textContent = state.wins;
 
       // Active element display
       const activeEl = state.activeElementData();
-      $("#hub-active-emoji").textContent = activeEl.emoji;
-      $("#hub-active-name").textContent = activeEl.name;
-      $("#hub-special-name").textContent = state.specialName;
-      $("#hub-tier").textContent = `Tier ${state.tier + 1}`;
+      $("#map-active-emoji").textContent = activeEl.emoji;
+      $("#map-active-name").textContent = activeEl.name;
+      $("#map-special-name").textContent = state.specialName;
+      $("#map-tier").textContent = `Tier ${state.tier + 1}`;
 
       // Owned-elements switcher (only shows if >1 element owned)
-      const switcher = $("#hub-element-switcher");
+      const switcher = $("#map-element-switcher");
       switcher.innerHTML = "";
       if (state.ownedElements.length > 1) {
         switcher.classList.remove("is-hidden");
@@ -204,25 +211,117 @@
         switcher.classList.add("is-hidden");
       }
 
-      $("#btn-start-battle").onclick = onStartBattle;
+      const landmarkAt = (x, y) => {
+        if (x === landmarks.shrine.x && y === landmarks.shrine.y) return "shrine";
+        if (x === landmarks.wildlands.x && y === landmarks.wildlands.y) return "wildlands";
+        if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
+        return null;
+      };
+      const danger = Math.max(
+        0,
+        3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
+      );
+      const grid = $("#map-grid");
+      grid.innerHTML = "";
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 3; x++) {
+          const tile = document.createElement("div");
+          tile.className = "map-tile";
+          const lm = landmarkAt(x, y);
+          if (lm) tile.classList.add(`is-${lm}`);
+          if (state.mapX === x && state.mapY === y) tile.classList.add("is-player");
+          const lmLabel = lm === "shrine" ? "Shrine"
+            : lm === "wildlands" ? "Wildlands"
+            : lm === "boss" ? "Boss Arena"
+            : "";
+          tile.innerHTML = `
+            <span class="map-tile__landmark">${lmLabel}</span>
+            <span class="map-tile__player" aria-hidden="true">${state.mapX === x && state.mapY === y ? "🧙" : ""}</span>
+          `;
+          grid.appendChild(tile);
+        }
+      }
+
+      const currentLandmark = landmarkAt(state.mapX, state.mapY);
+      const locationName = $("#map-location-name");
+      const dangerEl = $("#map-danger");
+      const actionBtn = $("#btn-map-action");
+      const shrineChart = $("#shrine-chart");
+
+      const isBossTime = Rules.isBossLevel(state.level);
+      if (currentLandmark === "shrine") {
+        locationName.textContent = "⛩️ Elemental Shrine";
+        dangerEl.textContent = state.hasShrineBlessing()
+          ? "Blessing ready: your next battle deals bonus damage."
+          : "Receive a blessing to empower your next battle.";
+        actionBtn.textContent = "✨ Receive Shrine Blessing";
+        actionBtn.classList.remove("is-hidden");
+        actionBtn.classList.remove("is-boss");
+        actionBtn.disabled = false;
+        actionBtn.onclick = onBlessAtShrine;
+        shrineChart.classList.remove("is-hidden");
+        shrineChart.innerHTML = `
+          <h3>Shrine Lore: Element Weaknesses</h3>
+          <ul class="shrine-chart-list">
+            ${Elements.map(el => `<li>${el.emoji} ${el.name} → weak to ${Elements[ElementIndex[el.weakness]].emoji} ${Elements[ElementIndex[el.weakness]].name}</li>`).join("")}
+          </ul>
+        `;
+      } else {
+        shrineChart.classList.add("is-hidden");
+        shrineChart.innerHTML = "";
+        if (currentLandmark === "boss") {
+          locationName.textContent = "🏛️ Boss Arena";
+          dangerEl.textContent = isBossTime
+            ? "The current boss is waiting."
+            : "No boss is here yet. Win battles to reach the next boss level.";
+          actionBtn.textContent = `⚔️ ${isBossTime ? "Challenge Boss" : "Boss Not Ready"}`;
+          actionBtn.classList.remove("is-hidden");
+          actionBtn.classList.toggle("is-boss", isBossTime);
+          actionBtn.disabled = !isBossTime;
+          actionBtn.onclick = onChallengeBoss;
+        } else {
+          actionBtn.classList.add("is-hidden");
+          actionBtn.classList.remove("is-boss");
+          actionBtn.disabled = false;
+          locationName.textContent = currentLandmark === "wildlands"
+            ? "🌲 The Wildlands"
+            : "🗺️ Open Terrain";
+          dangerEl.textContent = currentLandmark === "wildlands"
+            ? `Mob activity high. Danger tier ${danger}/3.`
+            : `Roaming zone. Danger tier ${danger}/3 (higher near the Boss Arena).`;
+        }
+      }
+
+      $("#btn-move-up").onclick = () => onMove(0, -1);
+      $("#btn-move-down").onclick = () => onMove(0, 1);
+      $("#btn-move-left").onclick = () => onMove(-1, 0);
+      $("#btn-move-right").onclick = () => onMove(1, 0);
+
       $("#btn-export").onclick = onExport;
       $("#btn-reset").onclick = onReset;
-
-      // Battle button label changes for boss levels
-      const isBoss = Rules.isBossLevel(state.level);
-      $("#btn-start-battle").innerHTML = isBoss
-        ? `⚔️ Face the Boss (Lvl ${state.level})`
-        : `⚔️ Start Battle ${state.level}`;
-      $("#btn-start-battle").classList.toggle("is-boss", isBoss);
 
       // Show a coaching tip if one applies for the current state.
       // Coach is optional — guard so the UI still works if the script
       // failed to load for any reason.
       if (window.Coach) {
-        window.Coach.render($("#hub-coach"), "hub", state);
+        window.Coach.render($("#map-coach"), "hub", state);
       }
 
-      this.showScreen("screen-hub");
+      this.showScreen("screen-map");
+    },
+
+    renderEncounterTransition({ enemy, onContinue }) {
+      const emoji = $("#transition-enemy-emoji");
+      const name = $("#transition-enemy-name");
+      const avatar = $(".map-transition__avatar");
+      if (emoji) {
+        emoji.textContent = enemy.emoji;
+        emoji.style.setProperty("--element-color", enemy.color);
+      }
+      if (avatar) avatar.style.setProperty("--element-color", enemy.color);
+      if (name) name.textContent = enemy.name;
+      this.showScreen("screen-transition");
+      _setTimeout(() => onContinue(), MAP_TRANSITION_DURATION);
     },
 
     // ---- Boss intro -------------------------------------------------
@@ -282,6 +381,9 @@
       // Reset log
       $("#battle-log").innerHTML = "";
       this._log(`A wild ${battle.enemy.name} appears!`);
+      if (battle._shrineBlessed) {
+        this._log("✨ Shrine blessing empowers your attacks in this fight.");
+      }
 
       // Coach tip — rendered with battle context so super-effective and
       // neutral-mob hints can fire.

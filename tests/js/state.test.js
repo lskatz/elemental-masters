@@ -24,6 +24,10 @@ test("GameState: starts with sensible defaults", () => {
   assert.equal(s.bossesBeaten, 0);
   assert.equal(s.hp, s.maxHp);
   assert.equal(s.energy, 0);
+  assert.equal(s.mapX, 1);
+  assert.equal(s.mapY, 1);
+  assert.equal(s.shrineBlessing, 0);
+  assert.equal(s.hasShrineBlessing(), false);
   assert.equal(s.dirtyForExport, false);
 });
 
@@ -155,6 +159,29 @@ test("GameState: onDefeat fully heals for a retry", () => {
   assert.equal(s.energy, 0);
 });
 
+test("GameState: moveOnMap clamps to 3x3 grid and marks dirty on movement", () => {
+  const { GameState } = loadGame();
+  const s = new GameState("H", "fire");
+  assert.equal(s.moveOnMap(1, 0), true);
+  assert.equal(s.mapX, 2);
+  assert.equal(s.mapY, 1);
+  assert.equal(s.moveOnMap(1, 0), false, "cannot move beyond right edge");
+  assert.equal(s.moveOnMap(-5, -5), true);
+  assert.equal(s.mapX, 0);
+  assert.equal(s.mapY, 0);
+});
+
+test("GameState: shrine blessing can be granted and consumed once", () => {
+  const { GameState } = loadGame();
+  const s = new GameState("H", "fire");
+  assert.equal(s.hasShrineBlessing(), false);
+  s.grantShrineBlessing();
+  assert.equal(s.hasShrineBlessing(), true);
+  assert.equal(s.consumeShrineBlessing(), true);
+  assert.equal(s.hasShrineBlessing(), false);
+  assert.equal(s.consumeShrineBlessing(), false, "no blessing left");
+});
+
 // ---------------------------------------------------------------------------
 // Element ownership
 // ---------------------------------------------------------------------------
@@ -199,6 +226,9 @@ test("GameState: toJSON / fromJSON round-trips faithfully", () => {
   s.grantElement("dust");
   s.takeDamage(5);
   s.gainEnergy(40);
+  s.mapX = 2;
+  s.mapY = 0;
+  s.shrineBlessing = 1;
 
   const snap = s.toJSON();
   const restored = GameState.fromJSON(snap);
@@ -211,6 +241,9 @@ test("GameState: toJSON / fromJSON round-trips faithfully", () => {
   assert.equal(restored.bossesBeaten, 1);
   assert.equal(restored.hp, s.hp);
   assert.equal(restored.energy, 40);
+  assert.equal(restored.mapX, 2);
+  assert.equal(restored.mapY, 0);
+  assert.equal(restored.shrineBlessing, 1);
 });
 
 test("GameState: fromJSON tolerates missing fields with sensible defaults", () => {
@@ -274,12 +307,18 @@ test("GameState: fromJSON clamps negative numbers to safe values", () => {
     bossesBeaten: -1,
     hp: -100,
     energy: -50,
+    mapX: -100,
+    mapY: 999,
+    shrineBlessing: -1,
   });
   assert.equal(s.level, 1, "level clamped to >= 1");
   assert.equal(s.wins, 0);
   assert.equal(s.bossesBeaten, 0);
   assert.equal(s.hp, 0, "HP clamped to >= 0");
   assert.equal(s.energy, 0);
+  assert.equal(s.mapX, 0);
+  assert.equal(s.mapY, 2);
+  assert.equal(s.shrineBlessing, 0);
 });
 
 test("GameState: fromJSON falls back to default when activeElement missing", () => {
