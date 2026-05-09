@@ -543,7 +543,10 @@ input {
 }
 .hub-actions .btn { flex: 1; }
 
-.is-hidden { display: none !important; }
+#btn-map-action.is-hidden,
+#shrine-chart.is-hidden {
+  display: none !important;
+}
 
 /* ----- World map -------------------------------------------------------- */
 

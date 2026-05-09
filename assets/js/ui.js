@@ -260,10 +260,14 @@
         actionBtn.disabled = false;
         actionBtn.onclick = onBlessAtShrine;
         shrineChart.classList.remove("is-hidden");
+        const chartRows = Elements.map(el => {
+          const weak = Elements[ElementIndex[el.weakness]];
+          return `<li>${el.emoji} ${el.name} → weak to ${weak.emoji} ${weak.name}</li>`;
+        }).join("");
         shrineChart.innerHTML = `
           <h3>Shrine Lore: Element Weaknesses</h3>
           <ul class="shrine-chart-list">
-            ${Elements.map(el => `<li>${el.emoji} ${el.name} → weak to ${Elements[ElementIndex[el.weakness]].emoji} ${Elements[ElementIndex[el.weakness]].name}</li>`).join("")}
+            ${chartRows}
           </ul>
         `;
       } else {
