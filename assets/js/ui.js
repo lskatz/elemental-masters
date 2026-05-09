@@ -246,8 +246,11 @@
       playerEl.setAttribute("aria-hidden", "true");
       playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji">${activeEl.emoji}</span>`;
       grid.appendChild(playerEl);
+      playerEl.style.transition = "none";
       playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
       playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+      playerEl.offsetHeight; // force style flush so initial placement does not animate
+      playerEl.style.removeProperty("transition");
 
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
       const locationName = $("#map-location-name");
