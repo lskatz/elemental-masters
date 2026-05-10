@@ -217,14 +217,16 @@
         if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
         return null;
       };
+      const MAP_SIZE = Rules.MAP_SIZE || 3;
       const danger = Math.max(
         0,
         3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
       );
       const grid = $("#map-grid");
+      grid.style.setProperty("--map-size", String(MAP_SIZE));
       $$(".map-tile", grid).forEach(tile => tile.remove());
-      for (let y = 0; y < 3; y++) {
-        for (let x = 0; x < 3; x++) {
+      for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
           const tile = document.createElement("div");
           tile.className = "map-tile";
           tile.style.left = `calc(${x} * (var(--map-cell-size) + var(--map-gap)))`;

@@ -19,10 +19,15 @@
   let state = null;
   /** The active Battle, or null when not in combat. */
   let currentBattle = null;
+  const MAP_MAX = window.GameRules.MAP_MAX;
+  const MAP_CENTER = window.GameRules.MAP_CENTER;
   const LANDMARKS = {
     shrine: { x: 0, y: 0 },
-    wildlands: { x: 0, y: 2 },
-    boss: { x: 2, y: 2 },
+    wildlands: {
+      x: Math.max(0, MAP_CENTER - 2),
+      y: Math.min(MAP_MAX, MAP_CENTER + 2),
+    },
+    boss: { x: MAP_MAX, y: MAP_MAX },
   };
   const ENCOUNTER_TYPES = {
     BOSS_NOT_READY: "boss_not_ready",

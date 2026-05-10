@@ -561,8 +561,10 @@ input {
 }
 
 .map-grid {
+  --map-size: 3;
   --map-gap: 0.5rem;
-  --map-cell-size: calc((100% - (2 * var(--map-gap))) / 3);
+  --map-gap-count: calc(var(--map-size) - 1);
+  --map-cell-size: calc((100% - (var(--map-gap-count) * var(--map-gap))) / var(--map-size));
   position: relative;
   width: min(100%, 360px);
   aspect-ratio: 1 / 1;
@@ -594,7 +596,7 @@ input {
   background: linear-gradient(180deg, rgba(255, 90, 106, 0.18), rgba(0, 0, 0, 0.25));
 }
 .map-tile__landmark {
-  font-size: 0.72rem;
+  font-size: 0.55rem;
   color: var(--text-2);
   min-height: 1.2em;
 }
@@ -616,7 +618,7 @@ input {
 }
 
 .map-player__emoji {
-  font-size: clamp(1.6rem, 6vw, 2rem);
+  font-size: clamp(0.82rem, calc(var(--map-cell-size) * 0.62), 1.35rem);
   line-height: 1;
   filter: drop-shadow(0 0 8px rgba(255, 210, 63, 0.35));
 }

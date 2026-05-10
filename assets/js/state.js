@@ -14,6 +14,10 @@
   const Balance = window.GameData.balance;
   const Elements = window.GameData.elements;
   const ElementIndex = window.GameData.elementIndex;
+  const MAP_SIZE = 10;
+  const MAP_MIN = 0;
+  const MAP_MAX = MAP_SIZE - 1;
+  const MAP_CENTER = Math.floor(MAP_SIZE / 2);
 
   /**
    * GameState — the entire saveable state of one playthrough.
@@ -36,9 +40,9 @@
 
       this.hp = this.maxHp;   // start at full HP
       this.energy = 0;        // builds up from attacks; spent on specials
-      // Overworld map position (3x3 grid). Center spawn.
-      this.mapX = 1;
-      this.mapY = 1;
+      // Overworld map position (10x10 grid). Center spawn.
+      this.mapX = MAP_CENTER;
+      this.mapY = MAP_CENTER;
       // Shrine blessing charges (consumed at battle start).
       this.shrineBlessing = 0;
 
@@ -162,12 +166,12 @@
     }
 
     /**
-     * Move on the overworld map. Coordinates are clamped to a 3x3 grid.
+     * Move on the overworld map. Coordinates are clamped to a 10x10 grid.
      * Returns true if the position changed.
      */
     moveOnMap(dx, dy) {
-      const nextX = Math.max(0, Math.min(2, this.mapX + Number(dx || 0)));
-      const nextY = Math.max(0, Math.min(2, this.mapY + Number(dy || 0)));
+      const nextX = Math.max(MAP_MIN, Math.min(MAP_MAX, this.mapX + Number(dx || 0)));
+      const nextY = Math.max(MAP_MIN, Math.min(MAP_MAX, this.mapY + Number(dy || 0)));
       const moved = nextX !== this.mapX || nextY !== this.mapY;
       if (!moved) return false;
       this.mapX = nextX;
@@ -258,8 +262,8 @@
       ));
       const parsedX = Number(data.mapX);
       const parsedY = Number(data.mapY);
-      s.mapX = Math.max(0, Math.min(2, Number.isFinite(parsedX) ? parsedX : 1));
-      s.mapY = Math.max(0, Math.min(2, Number.isFinite(parsedY) ? parsedY : 1));
+      s.mapX = Math.max(MAP_MIN, Math.min(MAP_MAX, Number.isFinite(parsedX) ? parsedX : MAP_CENTER));
+      s.mapY = Math.max(MAP_MIN, Math.min(MAP_MAX, Number.isFinite(parsedY) ? parsedY : MAP_CENTER));
       s.shrineBlessing = Math.max(0, Math.min(1, Number(data.shrineBlessing) || 0));
 
       s.dirtyForExport = false;
@@ -275,5 +279,5 @@
   }
 
   root.GameState = GameState;
-  root.GameRules = { isBossLevel };
+  root.GameRules = { isBossLevel, MAP_SIZE, MAP_MIN, MAP_MAX, MAP_CENTER };
 })(window);
