@@ -221,7 +221,10 @@
         if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
         return null;
       };
-      const MAP_SIZE = Number(Rules.MAP_SIZE) || 10;
+      const MAP_SIZE = Number(Rules.MAP_SIZE);
+      if (!Number.isInteger(MAP_SIZE) || MAP_SIZE <= 0) {
+        throw new Error("Invalid map size configuration.");
+      }
       const danger = Math.max(
         0,
         3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
@@ -329,6 +332,7 @@
         playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
 
         let done = false;
+        let fallbackId = null;
         const finishMove = () => {
           if (done) return;
           done = true;
@@ -339,12 +343,12 @@
         };
         const onTransitionDone = (ev) => {
           if (ev.target !== playerEl) return;
-          _clearTimeout(fallbackId);
+          if (fallbackId != null) _clearTimeout(fallbackId);
           playerEl.removeEventListener("transitionend", onTransitionDone);
           finishMove();
         };
         playerEl.addEventListener("transitionend", onTransitionDone);
-        const fallbackId = _setTimeout(() => {
+        fallbackId = _setTimeout(() => {
           playerEl.removeEventListener("transitionend", onTransitionDone);
           finishMove();
         }, MAP_WALK_DURATION + MAP_WALK_TIMEOUT_BUFFER);

@@ -21,11 +21,12 @@
   let currentBattle = null;
   const MAP_MAX = window.GameRules.MAP_MAX;
   const MAP_CENTER = window.GameRules.MAP_CENTER;
+  const WILDLANDS_OFFSET = 2;
   const LANDMARKS = {
     shrine: { x: 0, y: 0 },
     wildlands: {
-      x: Math.max(0, MAP_CENTER - 2),
-      y: Math.min(MAP_MAX, MAP_CENTER + 2),
+      x: Math.max(0, MAP_CENTER - WILDLANDS_OFFSET),
+      y: Math.min(MAP_MAX, MAP_CENTER + WILDLANDS_OFFSET),
     },
     boss: { x: MAP_MAX, y: MAP_MAX },
   };
