@@ -78,15 +78,16 @@ title: Elemental Masters
     <div id="map-element-switcher" class="element-switcher is-hidden"></div>
 
     <div class="map-card">
-      <p class="muted map-card__title">Overworld</p>
       <div id="map-grid" class="map-grid" aria-label="Overworld map"></div>
-      <p id="map-location-name" class="map-location-name"></p>
-      <p id="map-danger" class="muted map-danger"></p>
-      <div class="map-controls" aria-label="Move hero">
-        <button id="btn-move-up" class="btn btn--secondary map-controls__up">⬆ Move Up</button>
-        <button id="btn-move-left" class="btn btn--secondary map-controls__left">⬅ Move Left</button>
-        <button id="btn-move-right" class="btn btn--secondary map-controls__right">➡ Move Right</button>
-        <button id="btn-move-down" class="btn btn--secondary map-controls__down">⬇ Move Down</button>
+      <div class="map-card__controls">
+        <div class="map-card__location">
+          <p id="map-location-name" class="map-location-name"></p>
+          <p id="map-danger" class="muted map-danger"></p>
+        </div>
+        <div class="map-joystick" id="map-joystick"
+             aria-label="Drag to move hero. Arrow keys and WASD also work.">
+          <div class="map-joystick__knob" id="map-joystick-knob"></div>
+        </div>
       </div>
     </div>
 

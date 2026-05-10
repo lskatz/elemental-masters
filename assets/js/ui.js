@@ -66,6 +66,21 @@
     _timers.clear();
   }
 
+  // Module-level state for map screen (survives renderMap re-calls)
+  let _mapKeyHandler = null;  // keydown listener for arrow/WASD navigation
+  let _mapCallbacks = null;   // { onMove, onSwitchElement, onExport, onReset }
+  let _joystickAbort = null;  // AbortController to clean up joystick listeners
+
+  // Returns a function (x, y) → landmark name ("shrine"|"wildlands"|"boss"|null).
+  function _makeLandmarkAt(landmarks) {
+    return (x, y) => {
+      if (x === landmarks.shrine.x && y === landmarks.shrine.y) return "shrine";
+      if (x === landmarks.wildlands.x && y === landmarks.wildlands.y) return "wildlands";
+      if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
+      return null;
+    };
+  }
+
   const UI = {
     // ---- Screen routing ---------------------------------------------
 
@@ -171,20 +186,21 @@
 
     // ---- Overworld map ----------------------------------------------
 
-    renderMap({
-      state,
-      landmarks,
-      onMove,
-      onSwitchElement,
-      onExport,
-      onReset,
-    }) {
+    // Shared panel refresh — called by both renderMap (initial load) and
+    // updateMapAfterMove (in-place step update).  Touches only text / classes;
+    // never rebuilds tiles or calls showScreen, so there is no flash.
+    _refreshMapPanel(state, landmarks) {
+      const landmarkAt = _makeLandmarkAt(landmarks);
+
+      // Header stats
       $("#map-hero-name").textContent = state.heroName;
       $("#map-level").textContent = state.level;
       $("#map-wins").textContent = state.wins;
 
       // Active element display
       const activeEl = state.activeElementData();
+      const hubActiveCard = $(".hub-active-card");
+      if (hubActiveCard) hubActiveCard.style.setProperty("--element-color", activeEl.color);
       $("#map-active-emoji").textContent = activeEl.emoji;
       $("#map-active-name").textContent = activeEl.name;
       $("#map-special-name").textContent = state.specialName;
@@ -208,71 +224,26 @@
           );
           btn.style.setProperty("--element-color", el.color);
           btn.innerHTML = `<span aria-hidden="true">${el.emoji}</span><span>${el.name}</span>`;
-          btn.onclick = () => onSwitchElement(key);
+          btn.onclick = () => _mapCallbacks && _mapCallbacks.onSwitchElement(key);
           switcher.appendChild(btn);
         });
       } else {
         switcher.classList.add("is-hidden");
       }
 
-      const landmarkAt = (x, y) => {
-        if (x === landmarks.shrine.x && y === landmarks.shrine.y) return "shrine";
-        if (x === landmarks.wildlands.x && y === landmarks.wildlands.y) return "wildlands";
-        if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
-        return null;
-      };
-      const MAP_SIZE = Number(Rules.MAP_SIZE);
-      if (!Number.isInteger(MAP_SIZE) || MAP_SIZE <= 0) {
-        throw new Error("Invalid map size configuration.");
-      }
+      // Player emoji
+      const playerEmojiEl = $("#map-player-emoji");
+      if (playerEmojiEl) playerEmojiEl.textContent = activeEl.emoji;
+
+      // Location and danger text
       const danger = Math.max(
         0,
         3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
       );
-      const grid = $("#map-grid");
-      grid.style.setProperty("--map-size", String(MAP_SIZE));
-      $$(".map-tile", grid).forEach(tile => tile.remove());
-      for (let y = 0; y < MAP_SIZE; y++) {
-        for (let x = 0; x < MAP_SIZE; x++) {
-          const tile = document.createElement("div");
-          tile.className = "map-tile";
-          tile.style.left = `calc(${x} * (var(--map-cell-size) + var(--map-gap)))`;
-          tile.style.top = `calc(${y} * (var(--map-cell-size) + var(--map-gap)))`;
-          const lm = landmarkAt(x, y);
-          if (lm) tile.classList.add(`is-${lm}`);
-          const lmLabel = lm === "shrine" ? "Shrine"
-            : lm === "wildlands" ? "Wildlands"
-            : lm === "boss" ? "Boss Arena"
-            : "";
-          tile.innerHTML = `
-            <span class="map-tile__landmark">${lmLabel}</span>
-          `;
-          grid.appendChild(tile);
-        }
-      }
-
-      let playerEl = $("#map-player");
-      if (!playerEl || playerEl.parentElement !== grid) {
-        playerEl = document.createElement("div");
-        playerEl.id = "map-player";
-        playerEl.className = "map-player";
-        playerEl.setAttribute("aria-hidden", "true");
-        playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji"></span>`;
-        grid.appendChild(playerEl);
-      }
-      const playerEmojiEl = $("#map-player-emoji", playerEl);
-      if (playerEmojiEl) playerEmojiEl.textContent = activeEl.emoji;
-      playerEl.style.transitionDuration = `${MAP_WALK_DURATION}ms`;
-      playerEl.classList.add("map-player--no-transition");
-      playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
-      playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
-      requestAnimationFrame(() => playerEl.classList.remove("map-player--no-transition"));
-
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
       const locationName = $("#map-location-name");
       const dangerEl = $("#map-danger");
       const shrineChart = $("#shrine-chart");
-
       const isBossTime = Rules.isBossLevel(state.level);
       if (currentLandmark === "shrine") {
         locationName.textContent = "⛩️ Elemental Shrine";
@@ -308,17 +279,77 @@
         }
       }
 
-      const moveButtons = [
-        $("#btn-move-up"),
-        $("#btn-move-down"),
-        $("#btn-move-left"),
-        $("#btn-move-right"),
-      ];
-      const setMoveButtonsDisabled = (disabled) => {
-        moveButtons.forEach((btn) => {
-          if (btn) btn.disabled = disabled;
-        });
+      // Coach tip (guard in case coach.js failed to load)
+      if (window.Coach) {
+        window.Coach.render($("#map-coach"), "hub", state);
+      }
+    },
+
+    /** In-place map update after a non-encounter move or element switch.
+     *  Skips tile rebuild and showScreen so the screen never flashes. */
+    updateMapAfterMove(state, landmarks) {
+      this._refreshMapPanel(state, landmarks);
+    },
+
+    renderMap({
+      state,
+      landmarks,
+      onMove,
+      onSwitchElement,
+      onExport,
+      onReset,
+    }) {
+      _mapCallbacks = { onMove, onSwitchElement, onExport, onReset };
+
+      const MAP_SIZE = Number(Rules.MAP_SIZE);
+      if (!Number.isInteger(MAP_SIZE) || MAP_SIZE <= 0) {
+        throw new Error("Invalid map size configuration.");
+      }
+      const landmarkAt = _makeLandmarkAt(landmarks);
+
+      // Rebuild grid tiles
+      const grid = $("#map-grid");
+      grid.style.setProperty("--map-size", String(MAP_SIZE));
+      $$(".map-tile", grid).forEach(tile => tile.remove());
+      for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+          const tile = document.createElement("div");
+          tile.className = "map-tile";
+          tile.style.left = `calc(${x} * (var(--map-cell-size) + var(--map-gap)))`;
+          tile.style.top  = `calc(${y} * (var(--map-cell-size) + var(--map-gap)))`;
+          const lm = landmarkAt(x, y);
+          if (lm) tile.classList.add(`is-${lm}`);
+          const lmIcon = lm === "shrine" ? "⛩" : lm === "wildlands" ? "🌲" : lm === "boss" ? "🏛" : "";
+          tile.innerHTML = `<span class="map-tile__landmark" aria-hidden="true">${lmIcon}</span>`;
+          grid.appendChild(tile);
+        }
+      }
+
+      // Player element (reuse existing if already in this grid)
+      let playerEl = $("#map-player");
+      if (!playerEl || playerEl.parentElement !== grid) {
+        playerEl = document.createElement("div");
+        playerEl.id = "map-player";
+        playerEl.className = "map-player";
+        playerEl.setAttribute("aria-hidden", "true");
+        playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji"></span>`;
+        grid.appendChild(playerEl);
+      }
+      playerEl.style.transitionDuration = `${MAP_WALK_DURATION}ms`;
+      playerEl.classList.add("map-player--no-transition");
+      playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
+      playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+      requestAnimationFrame(() => playerEl.classList.remove("map-player--no-transition"));
+
+      // Info panel (stats, active element, switcher, location, coach)
+      this._refreshMapPanel(state, landmarks);
+
+      // ---- Walk / movement logic ----------------------------------------
+      const setJoystickLocked = (locked) => {
+        const joy = $("#map-joystick");
+        if (joy) joy.classList.toggle("is-locked", locked);
       };
+
       let isWalking = false;
       const runMove = (dx, dy) => {
         if (isWalking) return;
@@ -326,7 +357,7 @@
         if (!result || !result.moved) return;
 
         isWalking = true;
-        setMoveButtonsDisabled(true);
+        setJoystickLocked(true);
         playerEl.classList.add("is-walking");
         playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
         playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
@@ -337,7 +368,7 @@
           if (done) return;
           done = true;
           isWalking = false;
-          setMoveButtonsDisabled(false);
+          setJoystickLocked(false);
           playerEl.classList.remove("is-walking");
           if (typeof result.onArrive === "function") result.onArrive();
         };
@@ -354,20 +385,85 @@
         }, MAP_WALK_DURATION + MAP_WALK_TIMEOUT_BUFFER);
       };
 
-      $("#btn-move-up").onclick = () => runMove(0, -1);
-      $("#btn-move-down").onclick = () => runMove(0, 1);
-      $("#btn-move-left").onclick = () => runMove(-1, 0);
-      $("#btn-move-right").onclick = () => runMove(1, 0);
+      // ---- Virtual joystick -------------------------------------------
+      // Drag the ring in any direction; on release the dominant axis drives
+      // a single-tile move. AbortController ensures old listeners are torn
+      // down cleanly whenever renderMap is re-called (e.g. after a battle).
+      const JOYSTICK_THRESHOLD = 14; // px — minimum drag to register
+      const JOYSTICK_MAX      = 28;  // px — max knob offset from centre
+      const joystick    = $("#map-joystick");
+      const joystickKnob = $("#map-joystick-knob");
+      if (joystick && joystickKnob) {
+        if (_joystickAbort) _joystickAbort.abort();
+        _joystickAbort = new AbortController();
+        const { signal } = _joystickAbort;
 
+        let _activePointerId = null, _originX = 0, _originY = 0;
+
+        joystick.addEventListener("pointerdown", (e) => {
+          if (isWalking) return;
+          e.preventDefault();
+          joystick.setPointerCapture(e.pointerId);
+          _activePointerId = e.pointerId;
+          _originX  = e.clientX;
+          _originY  = e.clientY;
+          joystickKnob.classList.add("is-dragging");
+        }, { signal });
+
+        joystick.addEventListener("pointermove", (e) => {
+          if (e.pointerId !== _activePointerId) return;
+          const dx = e.clientX - _originX;
+          const dy = e.clientY - _originY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const r    = Math.min(dist, JOYSTICK_MAX);
+          const ang  = Math.atan2(dy, dx);
+          joystickKnob.style.transform =
+            `translate(${(Math.cos(ang) * r).toFixed(1)}px, ${(Math.sin(ang) * r).toFixed(1)}px)`;
+        }, { signal });
+
+        const _release = (e) => {
+          if (e.pointerId !== _activePointerId) return;
+          _activePointerId = null;
+          joystickKnob.classList.remove("is-dragging");
+          joystickKnob.style.transform = "translate(0, 0)";
+          const dx   = e.clientX - _originX;
+          const dy   = e.clientY - _originY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < JOYSTICK_THRESHOLD) return;
+          if (Math.abs(dx) >= Math.abs(dy)) {
+            runMove(dx > 0 ? 1 : -1, 0);
+          } else {
+            runMove(0, dy > 0 ? 1 : -1);
+          }
+        };
+        joystick.addEventListener("pointerup", _release, { signal });
+        joystick.addEventListener("pointercancel", (e) => {
+          if (e.pointerId !== _activePointerId) return;
+          _activePointerId = null;
+          joystickKnob.classList.remove("is-dragging");
+          joystickKnob.style.transform = "translate(0, 0)";
+        }, { signal });
+      }
+
+      // ---- Keyboard: arrow keys + WASD --------------------------------
+      if (_mapKeyHandler) document.removeEventListener("keydown", _mapKeyHandler);
+      _mapKeyHandler = (e) => {
+        if (!document.getElementById("screen-map").classList.contains("is-active")) return;
+        const dirMap = {
+          ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+          w: [0, -1], W: [0, -1], s: [0, 1], S: [0, 1],
+          a: [-1, 0], A: [-1, 0], d: [1, 0], D: [1, 0],
+        };
+        const dir = dirMap[e.key];
+        if (!dir) return;
+        if (e.key.startsWith("Arrow")) e.preventDefault();
+        runMove(dir[0], dir[1]);
+      };
+      document.addEventListener("keydown", _mapKeyHandler);
+
+      // ---- Utility buttons --------------------------------------------
       $("#btn-export").onclick = onExport;
       $("#btn-reset").onclick = onReset;
-
-      // Show a coaching tip if one applies for the current state.
-      // Coach is optional — guard so the UI still works if the script
-      // failed to load for any reason.
-      if (window.Coach) {
-        window.Coach.render($("#map-coach"), "hub", state);
-      }
 
       this.showScreen("screen-map");
     },
