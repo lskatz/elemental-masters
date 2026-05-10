@@ -313,9 +313,12 @@
       let fallbackStep = 0;
       if (!supportsCalcMultiply) {
         const styles = window.getComputedStyle(grid);
-        const rawGap = Number.parseFloat(styles.getPropertyValue("--map-gap"));
-        const mapGap = Number.isFinite(rawGap) ? rawGap : 0;
-        const cell = (grid.clientWidth - ((MAP_SIZE - 1) * mapGap)) / MAP_SIZE;
+        const rawGap = styles.getPropertyValue("--map-gap").trim() || "0px";
+        const mapGap = Number.parseFloat(rawGap) || 0;
+        const padX = (Number.parseFloat(styles.paddingLeft) || 0) +
+          (Number.parseFloat(styles.paddingRight) || 0);
+        const contentWidth = Math.max(0, grid.clientWidth - padX);
+        const cell = (contentWidth - ((MAP_SIZE - 1) * mapGap)) / MAP_SIZE;
         fallbackStep = Math.max(0, cell + mapGap);
       }
       const mapOffset = (idx) => {
