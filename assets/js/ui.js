@@ -313,7 +313,7 @@
       let fallbackStep = 0;
       if (!supportsCalcMultiply) {
         const styles = window.getComputedStyle(grid);
-        const rawGap = styles.getPropertyValue("--map-gap").trim() || "0px";
+        const rawGap = styles.getPropertyValue("--map-gap").trim() || "2px";
         const mapGap = Number.parseFloat(rawGap) || 0;
         const padX = (Number.parseFloat(styles.paddingLeft) || 0) +
           (Number.parseFloat(styles.paddingRight) || 0);
@@ -411,6 +411,7 @@
       // down cleanly whenever renderMap is re-called (e.g. after a battle).
       const JOYSTICK_THRESHOLD = 14; // px — minimum drag to register
       const JOYSTICK_MAX      = 28;  // px — max knob offset from centre
+      const JOYSTICK_TAP_THRESHOLD = 8; // px — minimum off-centre tap
       const joystick    = $("#map-joystick");
       const joystickKnob = $("#map-joystick-knob");
       if (joystick && joystickKnob) {
@@ -471,8 +472,7 @@
           const rect = joystick.getBoundingClientRect();
           const dx = e.clientX - (rect.left + rect.width / 2);
           const dy = e.clientY - (rect.top + rect.height / 2);
-          const tapThreshold = 8;
-          if (Math.sqrt(dx * dx + dy * dy) < tapThreshold) return;
+          if (Math.sqrt(dx * dx + dy * dy) < JOYSTICK_TAP_THRESHOLD) return;
           if (Math.abs(dx) >= Math.abs(dy)) {
             runMove(dx > 0 ? 1 : -1, 0);
           } else {
