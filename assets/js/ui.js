@@ -220,7 +220,7 @@
         3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
       );
       const grid = $("#map-grid");
-      grid.innerHTML = "";
+      $$(".map-tile", grid).forEach(tile => tile.remove());
       for (let y = 0; y < 3; y++) {
         for (let x = 0; x < 3; x++) {
           const tile = document.createElement("div");
@@ -240,16 +240,21 @@
         }
       }
 
-      const playerEl = document.createElement("div");
-      playerEl.id = "map-player";
-      playerEl.className = "map-player";
-      playerEl.setAttribute("aria-hidden", "true");
-      playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji">${activeEl.emoji}</span>`;
-      grid.appendChild(playerEl);
+      let playerEl = $("#map-player");
+      if (!playerEl || playerEl.parentElement !== grid) {
+        playerEl = document.createElement("div");
+        playerEl.id = "map-player";
+        playerEl.className = "map-player";
+        playerEl.setAttribute("aria-hidden", "true");
+        playerEl.innerHTML = `<span id="map-player-emoji" class="map-player__emoji"></span>`;
+        grid.appendChild(playerEl);
+      }
+      const playerEmojiEl = $("#map-player-emoji", playerEl);
+      if (playerEmojiEl) playerEmojiEl.textContent = activeEl.emoji;
       playerEl.style.transition = "none";
       playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
       playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
-      playerEl.offsetHeight; // force style flush so initial placement does not animate
+      playerEl.offsetHeight; // Force reflow so initial position applies before transitions.
       playerEl.style.removeProperty("transition");
 
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
