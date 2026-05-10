@@ -37,7 +37,7 @@
   const END_PAUSE = 400;        // ms — pause before screen transition on battle end
   const MAP_TRANSITION_DURATION = 900; // ms
   const MAP_WALK_DURATION = 400; // ms
-  const MAP_WALK_TIMEOUT_BUFFER = 120; // ms fallback buffer after transition
+  const MAP_WALK_TIMEOUT_BUFFER = 250; // ms fallback buffer after transition
   const TOAST_DURATION = 2400;  // ms — toast on-screen lifetime
   const TOAST_FADE = 300;       // ms — toast fade-out before removal
   const LOG_MAX_LINES = 50;     // cap battle-log size to avoid unbounded growth
@@ -221,7 +221,7 @@
         if (x === landmarks.boss.x && y === landmarks.boss.y) return "boss";
         return null;
       };
-      const MAP_SIZE = Rules.MAP_SIZE || 3;
+      const MAP_SIZE = Number(Rules.MAP_SIZE) || 10;
       const danger = Math.max(
         0,
         3 - Math.min(3, Math.abs(state.mapX - landmarks.boss.x) + Math.abs(state.mapY - landmarks.boss.y))
@@ -260,10 +260,10 @@
       const playerEmojiEl = $("#map-player-emoji", playerEl);
       if (playerEmojiEl) playerEmojiEl.textContent = activeEl.emoji;
       playerEl.style.transitionDuration = `${MAP_WALK_DURATION}ms`;
-      playerEl.style.transition = "none";
+      playerEl.classList.add("map-player--no-transition");
       playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
       playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
-      requestAnimationFrame(() => playerEl.style.removeProperty("transition"));
+      requestAnimationFrame(() => playerEl.classList.remove("map-player--no-transition"));
 
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
       const locationName = $("#map-location-name");

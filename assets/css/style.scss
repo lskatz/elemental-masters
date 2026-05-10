@@ -616,6 +616,9 @@ input {
   z-index: 2;
   pointer-events: none;
 }
+.map-player.map-player--no-transition {
+  transition: none !important;
+}
 
 .map-player__emoji {
   font-size: clamp(0.82rem, calc(var(--map-cell-size) * 0.62), 1.35rem);
