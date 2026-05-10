@@ -322,10 +322,11 @@
         fallbackStep = Math.max(0, cell + mapGap);
       }
       const mapOffset = (idx) => {
+        const safeIdx = Math.max(0, Number(idx) || 0);
         if (supportsCalcMultiply) {
-          return `calc(${idx} * (var(--map-cell-size) + var(--map-gap)))`;
+          return `calc(${safeIdx} * (var(--map-cell-size) + var(--map-gap)))`;
         }
-        return `${Math.max(0, idx) * fallbackStep}px`;
+        return `${safeIdx * fallbackStep}px`;
       };
       const landmarkAt = _makeLandmarkAt(landmarks);
 
