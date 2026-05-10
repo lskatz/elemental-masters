@@ -36,6 +36,8 @@
   const FLOAT_DURATION = 1000;  // ms — damage number lifetime
   const END_PAUSE = 400;        // ms — pause before screen transition on battle end
   const MAP_TRANSITION_DURATION = 900; // ms
+  const MAP_WALK_DURATION = 400; // ms
+  const MAP_WALK_TIMEOUT_BUFFER = 120; // ms fallback buffer after transition
   const TOAST_DURATION = 2400;  // ms — toast on-screen lifetime
   const TOAST_FADE = 300;       // ms — toast fade-out before removal
   const LOG_MAX_LINES = 50;     // cap battle-log size to avoid unbounded growth
@@ -251,10 +253,11 @@
       }
       const playerEmojiEl = $("#map-player-emoji", playerEl);
       if (playerEmojiEl) playerEmojiEl.textContent = activeEl.emoji;
+      playerEl.style.transitionDuration = `${MAP_WALK_DURATION}ms`;
       playerEl.style.transition = "none";
       playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
       playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
-      playerEl.offsetHeight; // Force reflow so initial position applies before transitions.
+      void playerEl.offsetHeight; // Force reflow so initial position applies before transitions.
       playerEl.style.removeProperty("transition");
 
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
@@ -338,7 +341,7 @@
         _setTimeout(() => {
           playerEl.removeEventListener("transitionend", onTransitionDone);
           finishMove();
-        }, 500);
+        }, MAP_WALK_DURATION + MAP_WALK_TIMEOUT_BUFFER);
       };
 
       $("#btn-move-up").onclick = () => runMove(0, -1);

@@ -24,6 +24,9 @@
     wildlands: { x: 0, y: 2 },
     boss: { x: 2, y: 2 },
   };
+  const ENCOUNTER_TYPES = {
+    BOSS_NOT_READY: "boss_not_ready",
+  };
 
   // ---- Boot ------------------------------------------------------------
 
@@ -100,7 +103,7 @@
 
             const encounter = rollEncounter(state);
             if (encounter) {
-              if (encounter.type === "boss_not_ready") {
+              if (encounter.type === ENCOUNTER_TYPES.BOSS_NOT_READY) {
                 window.UI.toast("The Boss Arena is quiet for now.", "error");
                 goToMap();
                 return;
@@ -221,7 +224,7 @@
     }
     if (isAtLandmark(s, LANDMARKS.boss)) {
       if (!window.GameRules.isBossLevel(s.level)) {
-        return { type: "boss_not_ready" };
+        return { type: ENCOUNTER_TYPES.BOSS_NOT_READY };
       }
       return { levelOffset: 0 };
     }
