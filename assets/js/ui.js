@@ -57,6 +57,10 @@
     _timers.add(id);
     return id;
   }
+  function _clearTimeout(id) {
+    clearTimeout(id);
+    _timers.delete(id);
+  }
   function _clearAllTimers() {
     for (const id of _timers) clearTimeout(id);
     _timers.clear();
@@ -259,8 +263,7 @@
       playerEl.style.transition = "none";
       playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
       playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
-      void playerEl.offsetHeight; // Force reflow so initial position applies before transitions.
-      playerEl.style.removeProperty("transition");
+      requestAnimationFrame(() => playerEl.style.removeProperty("transition"));
 
       const currentLandmark = landmarkAt(state.mapX, state.mapY);
       const locationName = $("#map-location-name");
@@ -335,12 +338,13 @@
           if (typeof result.onArrive === "function") result.onArrive();
         };
         const onTransitionDone = (ev) => {
-          if (ev.target !== playerEl || ev.propertyName !== "transform") return;
+          if (ev.target !== playerEl) return;
+          _clearTimeout(fallbackId);
           playerEl.removeEventListener("transitionend", onTransitionDone);
           finishMove();
         };
         playerEl.addEventListener("transitionend", onTransitionDone);
-        _setTimeout(() => {
+        const fallbackId = _setTimeout(() => {
           playerEl.removeEventListener("transitionend", onTransitionDone);
           finishMove();
         }, MAP_WALK_DURATION + MAP_WALK_TIMEOUT_BUFFER);
