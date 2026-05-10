@@ -24,8 +24,8 @@ test("GameState: starts with sensible defaults", () => {
   assert.equal(s.bossesBeaten, 0);
   assert.equal(s.hp, s.maxHp);
   assert.equal(s.energy, 0);
-  assert.equal(s.mapX, 1);
-  assert.equal(s.mapY, 1);
+  assert.equal(s.mapX, 5);
+  assert.equal(s.mapY, 5);
   assert.equal(s.shrineBlessing, 0);
   assert.equal(s.hasShrineBlessing(), false);
   assert.equal(s.dirtyForExport, false);
@@ -159,14 +159,16 @@ test("GameState: onDefeat fully heals for a retry", () => {
   assert.equal(s.energy, 0);
 });
 
-test("GameState: moveOnMap clamps to 3x3 grid and marks dirty on movement", () => {
+test("GameState: moveOnMap clamps to 10x10 grid and marks dirty on movement", () => {
   const { GameState } = loadGame();
   const s = new GameState("H", "fire");
   assert.equal(s.moveOnMap(1, 0), true);
-  assert.equal(s.mapX, 2);
-  assert.equal(s.mapY, 1);
+  assert.equal(s.mapX, 6);
+  assert.equal(s.mapY, 5);
+  assert.equal(s.moveOnMap(99, 0), true, "large movement clamps at right edge");
+  assert.equal(s.mapX, 9);
   assert.equal(s.moveOnMap(1, 0), false, "cannot move beyond right edge");
-  assert.equal(s.moveOnMap(-5, -5), true);
+  assert.equal(s.moveOnMap(-99, -99), true);
   assert.equal(s.mapX, 0);
   assert.equal(s.mapY, 0);
 });
@@ -317,7 +319,7 @@ test("GameState: fromJSON clamps negative numbers to safe values", () => {
   assert.equal(s.hp, 0, "HP clamped to >= 0");
   assert.equal(s.energy, 0);
   assert.equal(s.mapX, 0);
-  assert.equal(s.mapY, 2);
+  assert.equal(s.mapY, 9);
   assert.equal(s.shrineBlessing, 0);
 });
 
