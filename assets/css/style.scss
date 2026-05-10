@@ -555,50 +555,58 @@ input {
   padding: 1rem;
   margin-bottom: 1rem;
 }
-.map-card__title {
-  margin: 0 0 0.6rem;
-  font-size: 0.9rem;
-}
 
 .map-grid {
   --map-size: 3;
-  --map-gap: 0.5rem;
+  --map-gap: 2px;
   --map-gap-count: calc(var(--map-size) - 1);
   --map-cell-size: calc((100% - (var(--map-gap-count) * var(--map-gap))) / var(--map-size));
   position: relative;
   width: min(100%, 360px);
   aspect-ratio: 1 / 1;
   margin-inline: auto;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* Contiguous grassland / forest backdrop shared across all tiles */
+  background:
+    linear-gradient(145deg,
+      #2d6e25 0%,
+      #3a8a34 35%,
+      #2a6a28 65%,
+      #1e5218 100%
+    );
 }
 
 .map-tile {
   position: absolute;
   width: var(--map-cell-size);
   height: var(--map-cell-size);
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--surface-3);
+  border-radius: 0;
+  background: transparent; /* let the grassland show through */
+  border: 1px solid rgba(0, 0, 0, 0.20);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 0.4rem;
+  justify-content: flex-end;
+  padding: 0.1rem;
 }
 .map-tile.is-shrine {
-  border-color: rgba(178, 125, 255, 0.8);
-  background: linear-gradient(180deg, rgba(178, 125, 255, 0.18), rgba(0, 0, 0, 0.25));
+  background: rgba(178, 125, 255, 0.40);
+  border-color: rgba(210, 170, 255, 0.65);
 }
 .map-tile.is-wildlands {
-  border-color: rgba(92, 208, 122, 0.8);
-  background: linear-gradient(180deg, rgba(92, 208, 122, 0.18), rgba(0, 0, 0, 0.25));
+  background: rgba(0, 40, 0, 0.45);
+  border-color: rgba(60, 140, 60, 0.55);
 }
 .map-tile.is-boss {
-  border-color: rgba(255, 90, 106, 0.8);
-  background: linear-gradient(180deg, rgba(255, 90, 106, 0.18), rgba(0, 0, 0, 0.25));
+  background: rgba(255, 90, 106, 0.40);
+  border-color: rgba(255, 140, 150, 0.65);
 }
 .map-tile__landmark {
-  font-size: 0.55rem;
-  color: var(--text-2);
-  min-height: 1.2em;
+  font-size: 0.65rem;
+  line-height: 1;
+  text-align: center;
+  width: 100%;
 }
 
 .map-player {
@@ -638,33 +646,62 @@ input {
   75% { transform: translateY(-2px); }
 }
 
+/* Controls row: location text on the left, joystick on the right */
+.map-card__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.map-card__location {
+  flex: 1;
+  min-width: 0;
+}
 .map-location-name {
-  margin: 0.8rem 0 0.3rem;
-  font-size: 1.15rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
   font-weight: 600;
 }
 .map-danger {
-  margin: 0 0 0.8rem;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.88rem;
 }
 
-.map-controls {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-areas:
-    ". up ."
-    "left . right"
-    ". down .";
-  gap: 0.45rem;
+/* Virtual joystick — Minecraft-style circular thumbstick */
+.map-joystick {
+  flex-shrink: 0;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
 }
-.map-controls .btn {
-  min-height: 48px;
-  font-size: 0.95rem;
+.map-joystick.is-locked {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
-.map-controls__up { grid-area: up; }
-.map-controls__left { grid-area: left; }
-.map-controls__right { grid-area: right; }
-.map-controls__down { grid-area: down; }
+.map-joystick__knob {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.50);
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.40);
+  position: absolute;
+  transform: translate(0, 0);
+  transition: transform 0.12s ease-out;
+  pointer-events: none;
+}
+/* Disable snap animation while actively dragging */
+.map-joystick__knob.is-dragging {
+  transition: none;
+}
 
 .shrine-chart-list {
   margin: 0.4rem 0 0;

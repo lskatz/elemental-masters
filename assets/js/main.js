@@ -111,20 +111,20 @@
             if (encounter) {
               if (encounter.type === ENCOUNTER_TYPES.BOSS_NOT_READY) {
                 window.UI.toast("The Boss Arena is quiet for now.", "error");
-                goToMap();
+                window.UI.updateMapAfterMove(state, LANDMARKS);
                 return;
               }
               enterBattle({ withTransition: true, levelOffset: encounter.levelOffset });
               return;
             }
-            goToMap();
+            window.UI.updateMapAfterMove(state, LANDMARKS);
           },
         };
       },
       onSwitchElement: (key) => {
         state.setActive(key);
         autosave();
-        goToMap();
+        window.UI.updateMapAfterMove(state, LANDMARKS);
       },
       onExport: () => {
         const fname = Save.exportToFile(state);
