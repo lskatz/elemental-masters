@@ -199,8 +199,8 @@
 
       // Active element display
       const activeEl = state.activeElementData();
-      const activeCard = $(".hub-active-card");
-      if (activeCard) activeCard.style.setProperty("--element-color", activeEl.color);
+      const hubActiveCard = $(".hub-active-card");
+      if (hubActiveCard) hubActiveCard.style.setProperty("--element-color", activeEl.color);
       $("#map-active-emoji").textContent = activeEl.emoji;
       $("#map-active-name").textContent = activeEl.name;
       $("#map-special-name").textContent = state.specialName;
@@ -398,37 +398,36 @@
         _joystickAbort = new AbortController();
         const { signal } = _joystickAbort;
 
-        let _ptr = null, _ox = 0, _oy = 0;
+        let _activePointerId = null, _originX = 0, _originY = 0;
 
         joystick.addEventListener("pointerdown", (e) => {
           if (isWalking) return;
           e.preventDefault();
           joystick.setPointerCapture(e.pointerId);
-          _ptr = e.pointerId;
-          _ox  = e.clientX;
-          _oy  = e.clientY;
+          _activePointerId = e.pointerId;
+          _originX  = e.clientX;
+          _originY  = e.clientY;
           joystickKnob.classList.add("is-dragging");
         }, { signal });
 
         joystick.addEventListener("pointermove", (e) => {
-          if (e.pointerId !== _ptr) return;
-          const dx = e.clientX - _ox;
-          const dy = e.clientY - _oy;
+          if (e.pointerId !== _activePointerId) return;
+          const dx = e.clientX - _originX;
+          const dy = e.clientY - _originY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const r    = Math.min(dist, JOYSTICK_MAX);
           const ang  = Math.atan2(dy, dx);
           joystickKnob.style.transform =
-            `translate(${(Math.cos(ang) * r).toFixed(1)}px,` +
-            ` ${(Math.sin(ang) * r).toFixed(1)}px)`;
+            `translate(${(Math.cos(ang) * r).toFixed(1)}px, ${(Math.sin(ang) * r).toFixed(1)}px)`;
         }, { signal });
 
         const _release = (e) => {
-          if (e.pointerId !== _ptr) return;
-          _ptr = null;
+          if (e.pointerId !== _activePointerId) return;
+          _activePointerId = null;
           joystickKnob.classList.remove("is-dragging");
           joystickKnob.style.transform = "translate(0, 0)";
-          const dx   = e.clientX - _ox;
-          const dy   = e.clientY - _oy;
+          const dx   = e.clientX - _originX;
+          const dy   = e.clientY - _originY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < JOYSTICK_THRESHOLD) return;
           if (Math.abs(dx) >= Math.abs(dy)) {
@@ -439,8 +438,8 @@
         };
         joystick.addEventListener("pointerup", _release, { signal });
         joystick.addEventListener("pointercancel", (e) => {
-          if (e.pointerId !== _ptr) return;
-          _ptr = null;
+          if (e.pointerId !== _activePointerId) return;
+          _activePointerId = null;
           joystickKnob.classList.remove("is-dragging");
           joystickKnob.style.transform = "translate(0, 0)";
         }, { signal });
