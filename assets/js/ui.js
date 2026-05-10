@@ -306,22 +306,27 @@
         throw new Error("Invalid map size configuration.");
       }
       const grid = $("#map-grid");
+      grid.style.setProperty("--map-size", String(MAP_SIZE));
       const supportsCalcMultiply =
         !!(window.CSS && typeof window.CSS.supports === "function" &&
           window.CSS.supports("left", "calc(2 * 1px)"));
+      let fallbackStep = 0;
+      if (!supportsCalcMultiply) {
+        const styles = window.getComputedStyle(grid);
+        const rawGap = Number.parseFloat(styles.getPropertyValue("--map-gap"));
+        const mapGap = Number.isFinite(rawGap) ? rawGap : 0;
+        const cell = (grid.clientWidth - ((MAP_SIZE - 1) * mapGap)) / MAP_SIZE;
+        fallbackStep = Math.max(0, cell + mapGap);
+      }
       const mapOffset = (idx) => {
         if (supportsCalcMultiply) {
           return `calc(${idx} * (var(--map-cell-size) + var(--map-gap)))`;
         }
-        const styles = window.getComputedStyle(grid);
-        const mapGap = Number.parseFloat(styles.getPropertyValue("--map-gap")) || 0;
-        const cell = (grid.clientWidth - ((MAP_SIZE - 1) * mapGap)) / MAP_SIZE;
-        return `${Math.max(0, idx) * (cell + mapGap)}px`;
+        return `${Math.max(0, idx) * fallbackStep}px`;
       };
       const landmarkAt = _makeLandmarkAt(landmarks);
 
       // Rebuild grid tiles
-      grid.style.setProperty("--map-size", String(MAP_SIZE));
       $$(".map-tile", grid).forEach(tile => tile.remove());
       for (let y = 0; y < MAP_SIZE; y++) {
         for (let x = 0; x < MAP_SIZE; x++) {
