@@ -305,18 +305,39 @@
       if (!Number.isInteger(MAP_SIZE) || MAP_SIZE <= 0) {
         throw new Error("Invalid map size configuration.");
       }
+      const grid = $("#map-grid");
+      grid.style.setProperty("--map-size", String(MAP_SIZE));
+      const supportsCalcMultiply =
+        !!(window.CSS && typeof window.CSS.supports === "function" &&
+          window.CSS.supports("left", "calc(2 * 1px)"));
+      let fallbackStep = 0;
+      if (!supportsCalcMultiply) {
+        const styles = window.getComputedStyle(grid);
+        const rawGap = styles.getPropertyValue("--map-gap").trim() || "2px";
+        const mapGap = Number.parseFloat(rawGap) || 0;
+        const padX = (Number.parseFloat(styles.paddingLeft) || 0) +
+          (Number.parseFloat(styles.paddingRight) || 0);
+        const contentWidth = Math.max(0, grid.clientWidth - padX);
+        const cell = (contentWidth - ((MAP_SIZE - 1) * mapGap)) / MAP_SIZE;
+        fallbackStep = Math.max(0, cell + mapGap);
+      }
+      const mapOffset = (idx) => {
+        const safeIdx = Math.max(0, Number(idx) || 0);
+        if (supportsCalcMultiply) {
+          return `calc(${safeIdx} * (var(--map-cell-size) + var(--map-gap)))`;
+        }
+        return `${safeIdx * fallbackStep}px`;
+      };
       const landmarkAt = _makeLandmarkAt(landmarks);
 
       // Rebuild grid tiles
-      const grid = $("#map-grid");
-      grid.style.setProperty("--map-size", String(MAP_SIZE));
       $$(".map-tile", grid).forEach(tile => tile.remove());
       for (let y = 0; y < MAP_SIZE; y++) {
         for (let x = 0; x < MAP_SIZE; x++) {
           const tile = document.createElement("div");
           tile.className = "map-tile";
-          tile.style.left = `calc(${x} * (var(--map-cell-size) + var(--map-gap)))`;
-          tile.style.top  = `calc(${y} * (var(--map-cell-size) + var(--map-gap)))`;
+          tile.style.left = mapOffset(x);
+          tile.style.top  = mapOffset(y);
           const lm = landmarkAt(x, y);
           if (lm) tile.classList.add(`is-${lm}`);
           const lmIcon = lm === "shrine" ? "⛩" : lm === "wildlands" ? "🌲" : lm === "boss" ? "🏛" : "";
@@ -337,8 +358,8 @@
       }
       playerEl.style.transitionDuration = `${MAP_WALK_DURATION}ms`;
       playerEl.classList.add("map-player--no-transition");
-      playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
-      playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+      playerEl.style.setProperty("--player-x", mapOffset(state.mapX));
+      playerEl.style.setProperty("--player-y", mapOffset(state.mapY));
       requestAnimationFrame(() => playerEl.classList.remove("map-player--no-transition"));
 
       // Info panel (stats, active element, switcher, location, coach)
@@ -359,8 +380,8 @@
         isWalking = true;
         setJoystickLocked(true);
         playerEl.classList.add("is-walking");
-        playerEl.style.setProperty("--player-x", `calc(${state.mapX} * (var(--map-cell-size) + var(--map-gap)))`);
-        playerEl.style.setProperty("--player-y", `calc(${state.mapY} * (var(--map-cell-size) + var(--map-gap)))`);
+        playerEl.style.setProperty("--player-x", mapOffset(state.mapX));
+        playerEl.style.setProperty("--player-y", mapOffset(state.mapY));
 
         let done = false;
         let fallbackId = null;
@@ -391,6 +412,7 @@
       // down cleanly whenever renderMap is re-called (e.g. after a battle).
       const JOYSTICK_THRESHOLD = 14; // px — minimum drag to register
       const JOYSTICK_MAX      = 28;  // px — max knob offset from centre
+      const JOYSTICK_TAP_THRESHOLD = 8; // px — minimum off-centre tap
       const joystick    = $("#map-joystick");
       const joystickKnob = $("#map-joystick-knob");
       if (joystick && joystickKnob) {
@@ -442,6 +464,21 @@
           _activePointerId = null;
           joystickKnob.classList.remove("is-dragging");
           joystickKnob.style.transform = "translate(0, 0)";
+        }, { signal });
+
+        // Fallback: if drag/pointer behavior is unavailable, a tap/click on a
+        // joystick side still triggers a single move in that direction.
+        joystick.addEventListener("click", (e) => {
+          if (isWalking) return;
+          const rect = joystick.getBoundingClientRect();
+          const dx = e.clientX - (rect.left + rect.width / 2);
+          const dy = e.clientY - (rect.top + rect.height / 2);
+          if (Math.sqrt(dx * dx + dy * dy) < JOYSTICK_TAP_THRESHOLD) return;
+          if (Math.abs(dx) >= Math.abs(dy)) {
+            runMove(dx > 0 ? 1 : -1, 0);
+          } else {
+            runMove(0, dy > 0 ? 1 : -1);
+          }
         }, { signal });
       }
 

@@ -8,7 +8,7 @@ baseurl: "/elemental-masters"
 
 # Game version (semver) — used for save-file compatibility checks.
 # Bump this when the save format changes.
-game_version: "2.1.0"
+game_version: "2.2.0"
 
 # Build settings
 markdown: kramdown
